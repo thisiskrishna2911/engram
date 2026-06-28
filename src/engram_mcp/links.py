@@ -12,6 +12,8 @@ def _iter_notes(vault: Vault) -> Iterator[Path]:
         rel = p.relative_to(vault.root)
         if any(part.startswith(".") for part in rel.parts):
             continue
+        if p.name == "index.md":
+            continue
         yield p
 
 
