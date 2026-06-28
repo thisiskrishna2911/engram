@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Engram vault — the user's personal knowledge data, kept out of git by default.
+# Remove this line if you want to version your notes / use git as vault backup.
+/engram-data/
+
+# Local Claude settings (machine-specific)
+.claude/settings.local.json

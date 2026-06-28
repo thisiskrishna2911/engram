@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engram v0.1 — Design Spec</title>
+<meta name="description" content="Engram — an Engineering Memory System. Design spec, v0.1. Preserve the understanding, don't generate the knowledge.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ENGRAM — design-document identity (v0.1)
+   Type as duality:  serif = human voice · sans = structure · mono = machine
+   Trace accent: a single deep teal-cyan, used as the memory-trace edge.
+   ============================================================ */
+
+:root{
+  --paper:      #eef0f3;   /* cool engineering-notebook paper */
+  --paper-tint: #e6eaee;
+  --surface:    #ffffff;   /* lifted index-card / code surface */
+  --surface-2:  #f7f9fb;
+
+  --ink:    #1b2733;       /* primary ink */
+  --ink-2:  #45586a;       /* secondary */
+  --ink-3:  #6c7d8d;       /* muted captions */
+
+  --line:   #d6dee5;       /* hairline */
+  --line-2: #e4eaef;
+
+  --teal:        #0e7a82;  /* trace — markers / fills */
+  --teal-deep:   #0a5b62;  /* trace — text / links (AA) */
+  --teal-bright: #16a3ab;  /* trace — glow / hover */
+  --teal-wash:   #e4f1f1;  /* trace — tint backgrounds */
+  --teal-line:   #b9dcdd;
+
+  --warm:   #9a6326;       /* sparingly: guardrail / caution lead */
+  --warm-wash:#f4ecdf;
+
+  --serif: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --sans:  'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --mono:  'IBM Plex Mono', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --maxw: 1180px;
+  --reading: 720px;
+}
+
+*{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:18px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+::selection{ background:var(--teal-wash); color:var(--teal-deep); }
+
+a{ color:var(--teal-deep); text-decoration:none; }
+a:hover{ color:var(--teal-bright); }
+
+:focus-visible{
+  outline:2.5px solid var(--teal-bright);
+  outline-offset:3px;
+  border-radius:3px;
+}
+
+/* ---------- layout shell ---------- */
+.page{ max-width:var(--maxw); margin:0 auto; padding:0 clamp(20px,5vw,56px); }
+
+/* ============================================================
+   MASTHEAD
+   ============================================================ */
+.masthead{
+  position:relative;
+  padding:clamp(40px,7vw,84px) 0 clamp(34px,4vw,52px);
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.masthead::before{   /* faint dot-grid: notebook + knowledge-graph nodes */
+  content:"";
+  position:absolute; inset:0;
+  background-image:radial-gradient(var(--line) 1.1px, transparent 1.1px);
+  background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.55), transparent 78%);
+          mask-image:linear-gradient(180deg, rgba(0,0,0,.55), transparent 78%);
+  opacity:.5;
+  pointer-events:none;
+}
+.masthead > *{ position:relative; }
+
+.rule-top{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3);
+  padding-bottom:clamp(30px,5vw,56px);
+}
+.rule-top .node{ color:var(--teal); }
+
+.wordmark{
+  display:flex; align-items:baseline; gap:.5ch;
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:clamp(46px,9vw,78px);
+  letter-spacing:-.025em;
+  line-height:.95;
+  color:var(--ink);
+  margin:0;
+}
+.wordmark .dot{
+  width:.34ch; height:.34ch; align-self:flex-end;
+  background:var(--teal); border-radius:50%;
+  margin-bottom:.18em; flex:0 0 auto;
+}
+.subtitle{
+  font-family:var(--mono);
+  font-size:clamp(13px,1.7vw,15px);
+  letter-spacing:.04em;
+  color:var(--teal-deep);
+  margin:.9rem 0 0;
+  font-weight:500;
+}
+.lede{
+  font-family:var(--serif);
+  font-size:clamp(20px,2.7vw,26px);
+  line-height:1.4;
+  color:var(--ink-2);
+  max-width:30ch;
+  margin:clamp(22px,3vw,30px) 0 0;
+  font-weight:400;
+}
+.lede em{ color:var(--ink); font-style:italic; }
+
+.meta{
+  display:flex; flex-wrap:wrap; gap:0;
+  margin-top:clamp(30px,4vw,46px);
+  border-top:1px solid var(--line);
+}
+.meta dl{
+  margin:0;
+  padding:16px clamp(20px,3vw,34px) 4px 0;
+  border-right:1px solid var(--line);
+  margin-right:clamp(20px,3vw,34px);
+}
+.meta dl:last-child{ border-right:0; margin-right:0; }
+.meta dt{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:5px;
+}
+.meta dd{
+  margin:0; font-family:var(--sans); font-size:14.5px; font-weight:500; color:var(--ink);
+}
+.meta dd .accent{ color:var(--teal-deep); }
+
+/* ---------- mobile contents ---------- */
+.toc-mobile{ display:none; }
+
+/* ============================================================
+   READING LAYOUT  (spine + content)
+   ============================================================ */
+.layout{
+  display:grid;
+  grid-template-columns:212px minmax(0,1fr);
+  gap:clamp(30px,5vw,76px);
+  padding:clamp(40px,5vw,64px) 0 0;
+}
+
+/* ----- the SPINE : a memory-trace TOC with nodes + scroll progress ----- */
+.spine{
+  position:sticky; top:32px; align-self:start;
+  max-height:calc(100vh - 64px);
+  overflow:auto;
+  padding:4px 0 24px 0;
+  scrollbar-width:thin;
+}
+.spine-label{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); padding-left:24px; margin-bottom:18px;
+}
+.spine-track{ position:relative; }
+.spine-track::before{   /* the dormant trace line */
+  content:""; position:absolute; left:5px; top:8px; bottom:8px; width:2px;
+  background:var(--line);
+}
+.spine-progress{   /* the written-in trace (scroll progress) */
+  position:absolute; left:5px; top:8px; width:2px;
+  height:0; background:linear-gradient(var(--teal-bright),var(--teal));
+  transition:height .12s linear;
+}
+@media (prefers-reduced-motion: reduce){ .spine-progress{ transition:none; } }
+
+.spine a{
+  position:relative; display:flex; gap:14px; align-items:baseline;
+  padding:7px 0 7px 24px;
+  font-family:var(--sans); font-size:13px; line-height:1.3;
+  color:var(--ink-3);
+  transition:color .18s ease;
+}
+.spine a .sn{ font-family:var(--mono); font-size:11px; color:var(--ink-3); flex:0 0 auto; min-width:1.4ch; }
+.spine a::before{   /* node */
+  content:""; position:absolute; left:1.5px; top:12px;
+  width:9px; height:9px; border-radius:50%;
+  background:var(--paper); border:2px solid var(--line);
+  transition:all .2s ease; z-index:1;
+}
+.spine a:hover{ color:var(--ink); }
+.spine a:hover::before{ border-color:var(--teal); }
+.spine a.is-active{ color:var(--teal-deep); font-weight:600; }
+.spine a.is-active .sn{ color:var(--teal-deep); }
+.spine a.is-active::before{
+  background:var(--teal); border-color:var(--teal);
+  box-shadow:0 0 0 4px var(--teal-wash);
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+.content{ min-width:0; max-width:var(--reading); }
+
+.section{ padding-bottom:clamp(48px,6vw,76px); }
+.section + .section{ border-top:1px solid var(--line-2); padding-top:clamp(40px,5vw,60px); }
+
+.sec-head{ margin:0 0 clamp(18px,2.4vw,26px); }
+.sec-num{
+  display:inline-block;
+  font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+  color:var(--teal-deep); font-weight:500;
+  margin-bottom:8px;
+}
+h2.sec-title{
+  font-family:var(--sans); font-weight:600;
+  font-size:clamp(25px,3.4vw,32px); letter-spacing:-.018em; line-height:1.15;
+  color:var(--ink); margin:0;
+}
+h2.sec-title .thin{ color:var(--ink-3); font-weight:400; }
+
+h3{
+  font-family:var(--sans); font-weight:600;
+  font-size:clamp(17px,2vw,19px); letter-spacing:-.01em;
+  color:var(--ink); margin:clamp(30px,4vw,42px) 0 14px;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); margin:clamp(28px,3.5vw,38px) 0 12px; font-weight:500;
+}
+
+p{ margin:0 0 1.15em; }
+.content p:last-child{ margin-bottom:0; }
+strong{ color:var(--ink); font-weight:600; }
+em{ font-style:italic; }
+
+/* inline code = a touch of the machine */
+code{
+  font-family:var(--mono); font-size:.87em;
+  background:var(--teal-wash); color:var(--teal-deep);
+  padding:.08em .4em; border-radius:4px;
+  border:1px solid var(--teal-line);
+  white-space:normal; overflow-wrap:anywhere;
+}
+
+/* ---------- pull quotes (the principles) ---------- */
+.pquote{
+  margin:clamp(26px,3.5vw,38px) 0;
+  padding:4px 0 4px clamp(22px,3vw,32px);
+  border-left:3px solid var(--teal);
+  font-family:var(--serif); font-style:italic;
+  font-size:clamp(20px,2.6vw,25px); line-height:1.42;
+  color:var(--ink);
+}
+.pquote.is-final{
+  border-left:0; padding:clamp(28px,4vw,40px) clamp(26px,4vw,40px);
+  background:linear-gradient(180deg,var(--surface),var(--surface-2));
+  border:1px solid var(--teal-line);
+  border-radius:12px;
+  position:relative;
+  font-size:clamp(22px,3vw,29px);
+  box-shadow:0 1px 0 rgba(27,39,51,.03), 0 18px 40px -28px rgba(14,122,130,.32);
+}
+.pquote.is-final::before{
+  content:"Final principle — overrides everything else";
+  display:block;
+  font-family:var(--mono); font-style:normal;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--teal-deep); margin-bottom:16px; font-weight:500;
+}
+.pquote .src{
+  display:block; margin-top:14px;
+  font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.04em;
+  color:var(--ink-3);
+}
+
+/* ---------- ordered principle list with trace nodes ---------- */
+.principles{ list-style:none; counter-reset:p; margin:0; padding:0; }
+.principles li{
+  counter-increment:p;
+  position:relative; padding:13px 0 13px 52px;
+  border-bottom:1px solid var(--line-2);
+}
+.principles li:last-child{ border-bottom:0; }
+.principles li::before{
+  content:counter(p);
+  position:absolute; left:0; top:12px;
+  width:30px; height:30px; display:grid; place-items:center;
+  font-family:var(--mono); font-size:13px; font-weight:500;
+  color:var(--teal-deep); background:var(--teal-wash);
+  border:1px solid var(--teal-line); border-radius:50%;
+}
+
+/* ---------- generic bullet lists ---------- */
+ul.list{ list-style:none; margin:0; padding:0; }
+ul.list > li{
+  position:relative; padding:7px 0 7px 24px;
+}
+ul.list > li::before{
+  content:""; position:absolute; left:3px; top:16px;
+  width:7px; height:7px; border-radius:50%;
+  background:var(--teal); opacity:.85;
+}
+ul.list ul{ list-style:none; margin:8px 0 4px; padding:0; }
+ul.list ul > li{
+  position:relative; padding:5px 0 5px 22px;
+  font-size:.95em; color:var(--ink-2);
+}
+ul.list ul > li::before{
+  content:""; position:absolute; left:4px; top:15px;
+  width:6px; height:1.6px; background:var(--ink-3);
+}
+
+/* ============================================================
+   ARCHITECTURE — the boundary diagram (hand-built)
+   ============================================================ */
+.diagram{ margin:clamp(24px,3vw,34px) 0; }
+.diag-row{
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch;
+  gap:clamp(10px,1.5vw,18px);
+}
+.diag-node{
+  border-radius:12px; padding:20px 20px 18px;
+  border:1px solid var(--line); background:var(--surface);
+}
+.diag-node--reason{
+  border-color:var(--teal-line);
+  background:linear-gradient(180deg,var(--surface),var(--teal-wash));
+}
+.diag-node--hands{
+  border-color:#cdd7df;
+  background:linear-gradient(180deg,var(--surface),#eef2f5);
+}
+.diag-tag{
+  font-family:var(--mono); font-size:14px; font-weight:600; color:var(--ink);
+}
+.diag-role{
+  display:inline-block; margin-left:8px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em;
+  padding:2px 8px; border-radius:20px; vertical-align:middle;
+}
+.diag-node--reason .diag-role{ color:var(--teal-deep); background:var(--teal-wash); border:1px solid var(--teal-line); }
+.diag-node--hands  .diag-role{ color:var(--ink-2); background:#e7edf1; border:1px solid #cdd7df; }
+.diag-node ul{ list-style:none; margin:14px 0 0; padding:0; font-family:var(--sans); }
+.diag-node ul li{ position:relative; padding:4px 0 4px 16px; font-size:13.5px; color:var(--ink-2); line-height:1.45; }
+.diag-node ul li::before{ content:"·"; position:absolute; left:3px; color:var(--teal); font-weight:700; }
+.diag-node ul li code{ white-space:normal; }
+.diag-never{
+  display:inline-block; margin-top:14px;
+  font-family:var(--mono); font-size:11.5px; font-weight:500;
+  color:var(--warm); letter-spacing:.02em;
+}
+.diag-flux{
+  display:flex; flex-direction:column; justify-content:center; gap:18px;
+  padding:0 4px; min-width:104px; text-align:center;
+}
+.flux-line{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--ink-3);
+  position:relative; line-height:1.3;
+}
+.flux-line b{ display:block; color:var(--teal-deep); font-weight:600; letter-spacing:.04em; }
+.flux-arrow{ color:var(--teal); font-size:15px; }
+.diag-down{
+  text-align:center; font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+  color:var(--ink-3); padding:14px 0 12px;
+}
+.diag-down .flux-arrow{ display:block; font-size:18px; line-height:1; margin-top:2px; }
+.diag-vault{
+  border:1px dashed var(--teal-line); border-radius:12px;
+  background:var(--teal-wash);
+  padding:16px 22px; text-align:center;
+}
+.diag-vault .vname{ font-family:var(--mono); font-size:14px; font-weight:600; color:var(--teal-deep); }
+.diag-vault .vsub{ font-family:var(--sans); font-size:13px; color:var(--ink-2); margin-top:3px; }
+
+/* ============================================================
+   CODE / PRE  (trees, YAML template)
+   ============================================================ */
+.code{
+  position:relative;
+  margin:clamp(20px,2.6vw,28px) 0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+.code-label{
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3);
+  padding:11px 18px; border-bottom:1px solid var(--line-2);
+  background:var(--surface-2);
+}
+.code-label::before{ content:""; width:7px; height:7px; border-radius:2px; background:var(--teal); }
+.code pre{
+  margin:0; padding:18px 20px; overflow-x:auto;
+  font-family:var(--mono); font-size:13px; line-height:1.72; color:var(--ink);
+  tab-size:2;
+}
+.code pre .cm{ color:var(--ink-3); }        /* comments / annotations */
+.code pre .kw{ color:var(--teal-deep); }    /* keys */
+.code pre .lk{ color:var(--teal); font-weight:500; }  /* [[wikilinks]] */
+.code pre .dir{ color:var(--teal-deep); font-weight:500; }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.table-wrap{ margin:clamp(18px,2.4vw,26px) 0; overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+table.tbl{ width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14.5px; background:var(--surface); }
+.tbl thead th{
+  text-align:left; font-weight:600; color:var(--ink);
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  padding:13px 18px; background:var(--surface-2); border-bottom:1.5px solid var(--line);
+  white-space:nowrap;
+}
+.tbl tbody td{
+  padding:14px 18px; border-bottom:1px solid var(--line-2);
+  color:var(--ink-2); line-height:1.5; vertical-align:top;
+}
+.tbl tbody tr:last-child td{ border-bottom:0; }
+.tbl tbody tr:hover{ background:var(--surface-2); }
+.tbl td:first-child{ color:var(--ink); }
+.tbl td code{ white-space:normal; }
+.tbl .col-tool{ width:34%; }
+.tbl .col-key{ width:26%; font-weight:600; color:var(--ink); }
+.tbl td strong{ color:var(--ink); }
+.tbl td .warm-lead{ color:var(--warm); font-weight:600; }
+
+/* ============================================================
+   DATA FLOW (numbered trace)
+   ============================================================ */
+.prompt{
+  background:#152029; border-radius:10px; padding:16px 20px;
+  font-family:var(--mono); font-size:13px; line-height:1.6; color:#cfe3e4;
+  margin:clamp(20px,2.6vw,28px) 0; border:1px solid #243441;
+}
+.prompt .you{ color:#7fd3d9; }
+.prompt .cmd{ color:#e8c98a; }
+.prompt .said{ color:#aebfca; }
+
+.flow{ list-style:none; counter-reset:f; margin:clamp(8px,1.5vw,14px) 0 0; padding:0; position:relative; }
+.flow::before{ content:""; position:absolute; left:14px; top:14px; bottom:14px; width:2px; background:var(--teal-line); }
+.flow li{
+  counter-increment:f; position:relative;
+  padding:10px 0 10px 48px; min-height:30px;
+  font-family:var(--sans); font-size:14.5px; color:var(--ink-2); line-height:1.5;
+}
+.flow li::before{
+  content:counter(f);
+  position:absolute; left:0; top:9px;
+  width:30px; height:30px; display:grid; place-items:center;
+  font-family:var(--mono); font-size:13px; font-weight:600;
+  color:#fff; background:var(--teal); border-radius:50%;
+  box-shadow:0 0 0 4px var(--paper); z-index:1;
+}
+.flow li .ann{ color:var(--teal-deep); font-style:italic; }
+.flow li code{ white-space:normal; }
+
+/* ============================================================
+   CONFIDENCE SCALE
+   ============================================================ */
+.confidence{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:6px;
+  margin:clamp(18px,2.4vw,26px) 0;
+}
+.conf{
+  border:1px solid var(--line); border-radius:9px; padding:14px 12px 12px; text-align:center;
+  background:var(--surface);
+}
+.conf .n{ font-family:var(--mono); font-size:22px; font-weight:600; line-height:1; color:var(--teal-deep); }
+.conf .t{ font-family:var(--sans); font-size:12px; color:var(--ink-2); margin-top:8px; line-height:1.3; display:block; }
+.conf:nth-child(1){ background:linear-gradient(180deg,var(--surface),#fbfcfd); }
+.conf:nth-child(2){ background:linear-gradient(180deg,var(--surface),#f3f9f9); }
+.conf:nth-child(3){ background:linear-gradient(180deg,var(--surface),#e9f4f4); }
+.conf:nth-child(4){ background:linear-gradient(180deg,var(--surface),#ddf0f0); }
+.conf:nth-child(5){ background:linear-gradient(180deg,var(--surface),#cfeaeb); }
+.conf:nth-child(6){ background:linear-gradient(180deg,var(--surface),#bfe3e4); border-color:var(--teal-line); }
+
+/* ---------- chips ---------- */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; margin:clamp(14px,2vw,20px) 0; }
+.chip{
+  font-family:var(--mono); font-size:12.5px;
+  padding:6px 12px; border-radius:7px;
+  background:var(--surface); border:1px solid var(--line); color:var(--ink-2);
+}
+.chip.is-rel{ background:var(--teal-wash); border-color:var(--teal-line); color:var(--teal-deep); }
+
+/* ---------- ranked ladder (search) ---------- */
+.ladder{ list-style:none; counter-reset:r; margin:clamp(16px,2.2vw,24px) 0; padding:0; }
+.ladder li{
+  counter-increment:r; display:flex; align-items:center; gap:16px;
+  padding:11px 16px; margin-bottom:6px;
+  background:var(--surface); border:1px solid var(--line); border-radius:9px;
+  font-family:var(--sans); font-weight:500; color:var(--ink);
+}
+.ladder li .rank{
+  font-family:var(--mono); font-size:12px; font-weight:600; color:var(--teal-deep);
+  width:22px; flex:0 0 auto;
+}
+.ladder li .bar{ flex:1; height:6px; border-radius:4px; background:linear-gradient(90deg,var(--teal),var(--teal-line)); }
+.ladder li:nth-child(1) .bar{ max-width:100%; }
+.ladder li:nth-child(2) .bar{ max-width:84%; }
+.ladder li:nth-child(3) .bar{ max-width:68%; }
+.ladder li:nth-child(4) .bar{ max-width:52%; }
+.ladder li:nth-child(5) .bar{ max-width:36%; }
+.ladder li:nth-child(6) .bar{ max-width:22%; opacity:.8; }
+
+/* ---------- scope panels ---------- */
+.scope{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:clamp(18px,2.4vw,26px) 0; }
+.scope-card{ border-radius:12px; padding:22px 22px 18px; border:1px solid var(--line); background:var(--surface); }
+.scope-card.in{ border-color:var(--teal-line); background:linear-gradient(180deg,var(--surface),var(--teal-wash)); }
+.scope-card h4{
+  margin:0 0 14px; font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  display:flex; align-items:center; gap:9px;
+}
+.scope-card.in h4{ color:var(--teal-deep); }
+.scope-card.out h4{ color:var(--ink-3); }
+.scope-card h4 .mk{ width:9px; height:9px; border-radius:50%; }
+.scope-card.in h4 .mk{ background:var(--teal); }
+.scope-card.out h4 .mk{ background:transparent; border:1.5px solid var(--ink-3); }
+.scope-card p{ font-family:var(--sans); font-size:14px; line-height:1.55; color:var(--ink-2); }
+.scope-card.in p{ color:var(--ink); }
+.scope-card .deferred{ display:flex; flex-wrap:wrap; gap:7px; margin:4px 0 12px; }
+.scope-card .deferred .chip{ font-size:11.5px; color:var(--ink-3); background:var(--surface-2); }
+.scope-card .note{ font-family:var(--mono); font-size:11.5px; color:var(--warm); margin:8px 0 0; }
+
+/* ---------- success ---------- */
+.success{ list-style:none; margin:clamp(16px,2.2vw,24px) 0 0; padding:0; }
+.success li{
+  position:relative; padding:11px 0 11px 36px; border-bottom:1px solid var(--line-2);
+  color:var(--ink);
+}
+.success li:last-child{ border-bottom:0; }
+.success li::before{
+  content:"✓"; position:absolute; left:4px; top:11px;
+  font-family:var(--sans); font-size:13px; font-weight:700; color:var(--teal);
+}
+
+/* ---------- callout (architecture closing / error principle) ---------- */
+.callout{
+  border-left:3px solid var(--teal); background:var(--teal-wash);
+  padding:16px 20px; border-radius:0 10px 10px 0; margin:clamp(18px,2.4vw,26px) 0;
+  font-family:var(--sans); font-size:14.5px; color:var(--ink); line-height:1.55;
+}
+
+/* ============================================================
+   COLOPHON
+   ============================================================ */
+.colophon{
+  border-top:1px solid var(--line);
+  margin-top:clamp(20px,4vw,40px);
+  padding:clamp(40px,6vw,72px) 0 clamp(50px,7vw,90px);
+  text-align:center;
+}
+.colophon .seal{
+  width:34px; height:34px; margin:0 auto 22px; border-radius:50%;
+  background:var(--teal-wash); border:1px solid var(--teal-line);
+  display:grid; place-items:center;
+}
+.colophon .seal span{ width:9px; height:9px; border-radius:50%; background:var(--teal); }
+.colophon blockquote{
+  margin:0 auto; max-width:30ch;
+  font-family:var(--serif); font-style:italic; font-size:clamp(19px,2.4vw,23px);
+  line-height:1.42; color:var(--ink);
+}
+.colophon .end{
+  margin-top:26px; font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:920px){
+  .layout{ grid-template-columns:1fr; gap:0; padding-top:clamp(28px,5vw,40px); }
+  .spine{ display:none; }
+  .content{ max-width:none; }
+  .toc-mobile{ display:block; margin-top:28px; border-top:1px solid var(--line); }
+  .toc-mobile summary{
+    cursor:pointer; list-style:none; padding:18px 0 18px 4px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .toc-mobile summary::-webkit-details-marker{ display:none; }
+  .toc-mobile summary::after{ content:"+"; font-size:16px; color:var(--teal); }
+  .toc-mobile[open] summary::after{ content:"–"; }
+  .toc-mobile ol{ margin:0 0 18px; padding:0 0 0 4px; list-style:none; columns:2; column-gap:24px; }
+  .toc-mobile li{ break-inside:avoid; padding:6px 0; }
+  .toc-mobile a{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); }
+  .toc-mobile .sn{ font-family:var(--mono); font-size:11px; color:var(--teal-deep); margin-right:8px; }
+}
+@media (max-width:680px){
+  body{ font-size:17px; }
+  .diag-row{ grid-template-columns:1fr; }
+  .diag-flux{ flex-direction:row; justify-content:center; min-width:0; padding:12px 0; }
+  .confidence{ grid-template-columns:repeat(3,1fr); }
+  .scope{ grid-template-columns:1fr; }
+  .meta dl{ border-right:0; margin-right:0; padding-right:0; }
+}
+
+@media print{
+  body{ background:#fff; font-size:11pt; }
+  .spine, .toc-mobile, .masthead::before{ display:none; }
+  .layout{ grid-template-columns:1fr; }
+  .section{ break-inside:avoid; }
+  a{ color:inherit; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== MASTHEAD ===================== -->
+<header class="masthead">
+  <div class="page">
+    <div class="rule-top">
+      <span><span class="node">●</span>&nbsp; ENGRAM · ENGINEERING MEMORY SYSTEM</span>
+      <span>DESIGN SPEC · v0.1</span>
+    </div>
+    <h1 class="wordmark">Engram<span class="dot" aria-hidden="true"></span></h1>
+    <p class="subtitle">v0.1 — Design Spec</p>
+    <p class="lede">An <em>Engineering Memory System</em>, not a note-taking app — built to preserve understanding, not generate knowledge.</p>
+
+    <div class="meta">
+      <dl><dt>Date</dt><dd>2026-06-28</dd></dl>
+      <dl><dt>Status</dt><dd><span class="accent">Approved</span> (brainstorming) — pending implementation plan</dd></dl>
+      <dl><dt>Author</dt><dd>Krishna (vision) · captured via brainstorming</dd></dl>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+<div class="layout">
+
+  <!-- ===================== SPINE / TOC ===================== -->
+  <nav class="spine" aria-label="Table of contents">
+    <div class="spine-label">Contents</div>
+    <div class="spine-track">
+      <div class="spine-progress" id="spineProgress" aria-hidden="true"></div>
+      <a href="#s1"  data-spy="s1"><span class="sn">1</span><span>Mission</span></a>
+      <a href="#s2"  data-spy="s2"><span class="sn">2</span><span>Core Principles</span></a>
+      <a href="#s3"  data-spy="s3"><span class="sn">3</span><span>Architecture</span></a>
+      <a href="#s4"  data-spy="s4"><span class="sn">4</span><span>engram-mcp</span></a>
+      <a href="#s5"  data-spy="s5"><span class="sn">5</span><span>engram skill</span></a>
+      <a href="#s6"  data-spy="s6"><span class="sn">6</span><span>Data Flow</span></a>
+      <a href="#s7"  data-spy="s7"><span class="sn">7</span><span>Error Handling</span></a>
+      <a href="#s8"  data-spy="s8"><span class="sn">8</span><span>Note Template</span></a>
+      <a href="#s9"  data-spy="s9"><span class="sn">9</span><span>Vault Structure</span></a>
+      <a href="#s10" data-spy="s10"><span class="sn">10</span><span>Search</span></a>
+      <a href="#s11" data-spy="s11"><span class="sn">11</span><span>Testing</span></a>
+      <a href="#s12" data-spy="s12"><span class="sn">12</span><span>Scope</span></a>
+      <a href="#s13" data-spy="s13"><span class="sn">13</span><span>Success</span></a>
+    </div>
+  </nav>
+
+  <!-- ===================== CONTENT ===================== -->
+  <main class="content">
+
+    <!-- 1. MISSION -->
+    <section class="section" id="s1">
+      <div class="sec-head">
+        <span class="sec-num">§ 01</span>
+        <h2 class="sec-title">Mission</h2>
+      </div>
+      <p>Engram is an <strong>Engineering Memory System</strong>, not a note-taking app. Its purpose is to <strong>preserve the user's understanding, not generate knowledge</strong>. Every design decision answers one question:</p>
+
+      <blockquote class="pquote">Will Future Krishna understand what Present Krishna understood?</blockquote>
+
+      <p>Engram reduces the friction between <em>learning</em> and <em>documenting</em> so the user can focus on understanding rather than writing Markdown.</p>
+
+      <blockquote class="pquote is-final">
+        Engram exists to preserve my thinking, not replace it.
+      </blockquote>
+    </section>
+
+    <!-- 2. CORE PRINCIPLES -->
+    <section class="section" id="s2">
+      <div class="sec-head">
+        <span class="sec-num">§ 02</span>
+        <h2 class="sec-title">Core Principles <span class="thin">— guardrails</span></h2>
+      </div>
+      <ol class="principles">
+        <li><strong>AI is a scribe, not an author.</strong></li>
+        <li>Preserve the user's understanding and <strong>voice</strong> — format only, never rewrite into textbook language.</li>
+        <li>Never hallucinate or inject knowledge unless explicitly requested.</li>
+        <li>Prefer simple, hand-editable Markdown over complex abstractions.</li>
+        <li>Reduce friction. Organize automatically. Encourage active recall.</li>
+        <li>The AI helps the user think — it never thinks <em>for</em> the user.</li>
+        <li><strong>Strict separation:</strong> the MCP server never reasons, decides, or generates content; the AI never touches the filesystem except through MCP.</li>
+      </ol>
+    </section>
+
+    <!-- 3. ARCHITECTURE -->
+    <section class="section" id="s3">
+      <div class="sec-head">
+        <span class="sec-num">§ 03</span>
+        <h2 class="sec-title">Architecture</h2>
+      </div>
+      <p>Two deliverables, one principle — <strong>Claude is the scribe, the MCP server is the hands.</strong></p>
+
+      <div class="diagram" role="img" aria-label="Boundary diagram: the engram skill reasons and calls tools; the engram-mcp server performs filesystem operations and returns data; the server reads and writes the engram-data Markdown vault.">
+        <div class="diag-row">
+          <div class="diag-node diag-node--reason">
+            <div><span class="diag-tag">engram skill</span><span class="diag-role">REASONING</span></div>
+            <ul>
+              <li>placement decisions</li>
+              <li>fills template from the user's words <em>(format)</em></li>
+              <li><code>[[links]]</code>, mentor Qs</li>
+            </ul>
+            <span class="diag-never">NEVER writes files</span>
+          </div>
+
+          <div class="diag-flux" aria-hidden="true">
+            <span class="flux-line"><b>calls / tools</b><span class="flux-arrow">▶</span></span>
+            <span class="flux-line"><span class="flux-arrow">◀</span><b>data</b></span>
+          </div>
+
+          <div class="diag-node diag-node--hands">
+            <div><span class="diag-tag">engram-mcp</span><span class="diag-role">HANDS</span></div>
+            <ul>
+              <li>filesystem operations</li>
+              <li>deterministic parsing <em>(frontmatter / headings / <code>[[wikilinks]]</code>)</em></li>
+            </ul>
+            <span class="diag-never">NEVER reasons / generates</span>
+          </div>
+        </div>
+
+        <div class="diag-down" aria-hidden="true">reads / writes <span class="flux-arrow">▼</span></div>
+
+        <div class="diag-vault">
+          <div class="vname">engram-data/ &nbsp;— Obsidian Markdown vault</div>
+          <div class="vsub">plain <code>.md</code> files — hand-editable, no lock-in</div>
+        </div>
+      </div>
+
+      <ul class="list">
+        <li><strong><code>engram-mcp</code></strong> — Python MCP server, <strong>stdio</strong> transport. Vault root configured via <code>ENGRAM_VAULT</code> (default <code>engram-data/</code>). Deterministic only. Registered in the user's Claude config so this Claude can call it.</li>
+        <li><strong><code>engram</code> skill</strong> — <code>.claude/skills/engram/SKILL.md</code>. All reasoning. Invoked via <code>/engram</code> (and/or auto-triggers on "I learned…"). Calls MCP tools; never touches the filesystem.</li>
+      </ul>
+
+      <div class="callout"><strong>The boundary is the product.</strong> The server returns <em>data</em>; Claude makes <em>decisions</em>. Parsing existing structure (frontmatter, headings, links) is <strong>not</strong> reasoning — it does not decide, generate, or hallucinate — so the server can be smart about <em>lookups</em> while remaining a pure scribe's tool.</div>
+
+      <h3>Key decisions <span style="font-weight:400;color:var(--ink-3)">(with rationale)</span></h3>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-key">Decision</th><th style="width:24%">Choice</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-key">What the "AI Agent" is</td>
+              <td><strong>Claude + <code>engram</code> skill</strong> (build only the server)</td>
+              <td>Captures the carefully-specified workflow in one version-controlled artifact; fits the user's existing skill+MCP setup; no separate app, LLM key, or cost.</td>
+            </tr>
+            <tr>
+              <td class="col-key">Vault folder tree</td>
+              <td><strong>Lazy creation</strong></td>
+              <td>Folders + <code>index.md</code> created only when a note needs them. Vault only ever contains touched topics. The <code>Engineering/</code> tree becomes a <em>placement map</em> the skill reasons over, not pre-created empty folders.</td>
+            </tr>
+            <tr>
+              <td class="col-key">Server depth</td>
+              <td><strong>Structure-aware indexer</strong></td>
+              <td>Deterministically parses frontmatter/headings/wikilinks to power ranked search, metadata queries, backlinks, index rebuild. Token-cheap for Claude; realizes the full spec; no cache complexity. Interface is forward-compatible with a future persistent index.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. COMPONENT 1 -->
+    <section class="section" id="s4">
+      <div class="sec-head">
+        <span class="sec-num">§ 04</span>
+        <h2 class="sec-title">Component 1 <span class="thin">— <code>engram-mcp</code> (the server)</span></h2>
+      </div>
+      <p>Python package, <code>src/</code> layout:</p>
+
+      <div class="code">
+        <div class="code-label">package layout</div>
+<pre>engram/
+  pyproject.toml
+  src/engram_mcp/
+    __init__.py
+    server.py        <span class="cm"># FastMCP app + tool registrations</span>
+    vault.py         <span class="cm"># path safety (resolve under root, reject ..), ENGRAM_VAULT config</span>
+    notes.py         <span class="cm"># read / write / append / rename / move / soft-delete</span>
+    folders.py       <span class="cm"># create (lazy nested) / list / rename</span>
+    frontmatter.py   <span class="cm"># parse + serialize YAML frontmatter (lenient on hand-edit typos)</span>
+    markdown.py      <span class="cm"># extract # headings and [[wikilinks]] from a body</span>
+    search.py        <span class="cm"># ranked search + find_by_metadata</span>
+    links.py         <span class="cm"># backlink resolution (scan vault for [[target]])</span>
+    index.py         <span class="cm"># rebuild_index(folder) -&gt; deterministic index.md</span>
+  tests/</pre>
+      </div>
+
+      <h3>Tool surface <span style="font-weight:400;color:var(--ink-3)">(v0.1)</span></h3>
+
+      <p class="eyebrow">Folders</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-tool">Tool</th><th>Purpose / Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>create_folder(path)</code></td><td>Create nested folders lazily. Returns created path(s).</td></tr>
+            <tr><td><code>list_dir(path)</code></td><td>List child folders + notes with light metadata (name, type, mtime).</td></tr>
+            <tr><td><code>rename_folder(path, new_name)</code></td><td>Rename a folder.</td></tr>
+            <tr><td><code>move(src, dest)</code></td><td>Move a note or folder.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="eyebrow">Notes</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-tool">Tool</th><th>Purpose / Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>read_note(path)</code></td><td>Full content + parsed metadata (frontmatter, headings, links).</td></tr>
+            <tr><td><code>write_note(path, content, overwrite=False)</code></td><td>Create or (explicitly) overwrite. <strong>Default refuses to clobber.</strong></td></tr>
+            <tr><td><code>append_note(path, content)</code></td><td>Append text/section to an existing note.</td></tr>
+            <tr><td><code>rename_note(path, new_title)</code></td><td>Rename a note file.</td></tr>
+            <tr><td><code>delete_note(path)</code></td><td><strong>Soft delete</strong> → moves to <code>.trash/</code> (recoverable).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="eyebrow">Structure / queries <span style="text-transform:none;letter-spacing:0;color:var(--teal-deep)">— the structure-aware value</span></p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-tool">Tool</th><th>Purpose / Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>search(query, limit)</code></td><td>Ranked hits across <strong>title &gt; alias &gt; tag &gt; heading &gt; content</strong>; each hit = path, matched field, snippet, score.</td></tr>
+            <tr><td><code>find_by_metadata(field, value)</code></td><td>Notes whose frontmatter <code>field</code> matches <code>value</code> (e.g. tag, status, confidence, project).</td></tr>
+            <tr><td><code>get_backlinks(note)</code></td><td>Notes containing <code>[[note]]</code>.</td></tr>
+            <tr><td><code>list_headings(note)</code></td><td>Heading outline of a note.</td></tr>
+            <tr><td><code>get_metadata(note)</code></td><td>Frontmatter as a structured dict.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="eyebrow">Index</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-tool">Tool</th><th>Purpose / Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>rebuild_index(folder)</code></td><td>Regenerate <code>index.md</code> purely from directory contents: child folders, child notes, recently-added. Deterministic, idempotent.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Design choices baked into the server</h3>
+      <ul class="list">
+        <li><strong><code>overwrite=False</code> by default</strong> — no silent clobber; forces Claude to be deliberate.</li>
+        <li><strong>Soft-delete to <code>.trash/</code></strong> — nothing irrecoverable; honors the "preserve" ethos.</li>
+        <li><strong>Lazy <code>create_folder</code></strong> — matches the vault-tree decision.</li>
+        <li><strong>Path safety</strong> — every path resolved under the vault root; reject <code>..</code>/absolute escapes.</li>
+        <li><strong>Structured returns</strong> — every tool returns a dict (path, title, mtime, …), not raw text.</li>
+        <li><strong>Lenient frontmatter parsing</strong> — a hand-edited YAML typo must never crash a query.</li>
+      </ul>
+    </section>
+
+    <!-- 5. COMPONENT 2 -->
+    <section class="section" id="s5">
+      <div class="sec-head">
+        <span class="sec-num">§ 05</span>
+        <h2 class="sec-title">Component 2 <span class="thin">— <code>engram</code> skill (the reasoning)</span></h2>
+      </div>
+      <p><code>.claude/skills/engram/SKILL.md</code> (+ reference files as needed) encodes, as prompt/instructions <strong>only</strong> (no code, no filesystem access):</p>
+      <ul class="list">
+        <li><strong>Learning-session workflow</strong> — topic + explanation → decide placement (via the <code>Engineering/</code> placement map) → fill the <strong>Standard Note Template</strong> strictly from the user's words → <code>write_note</code> → lazy <code>create_folder</code> → <code>rebuild_index</code> → suggest <em>real</em> <code>[[Related Topics]]</code> → <strong>one</strong> Mentor question.</li>
+        <li><strong>The exact note template, YAML frontmatter, and metadata block</strong> (Section 8).</li>
+        <li><strong>Hard guardrails</strong> — never rewrite into textbook language, never add technical info, never expand concepts, preserve the user's voice, never invent "gaps."</li>
+        <li><strong>Retrieval discipline</strong> — use <code>search</code> / <code>find_by_metadata</code> / <code>get_backlinks</code> instead of reading the whole vault.</li>
+        <li><strong>Mentor Mode</strong> — exactly ONE follow-up question, or ONE pointed misunderstanding, or ONE next-topic suggestion. Never a lecture.</li>
+      </ul>
+    </section>
+
+    <!-- 6. DATA FLOW -->
+    <section class="section" id="s6">
+      <div class="sec-head">
+        <span class="sec-num">§ 06</span>
+        <h2 class="sec-title">Data Flow <span class="thin">— a learning session</span></h2>
+      </div>
+
+      <div class="prompt">
+        <span class="you">You:</span> <span class="cmd">/engram</span> → <span class="said">"Today I learned how Tokio's work-stealing scheduler rebalances tasks across worker threads…"</span>
+      </div>
+
+      <ol class="flow">
+        <li>Skill parses intent → topic, explanation, optional source/tags</li>
+        <li>Skill decides placement via the <code>Engineering/</code> map → e.g. <code>Languages/Rust/</code> or <code>Concurrency/</code></li>
+        <li>Skill: <code>search(query)</code> + <code>list_dir(folder)</code> <span class="ann">── dedupe: is there already a related note?</span></li>
+        <li>Skill fills the Standard Note Template <span class="ann">── STRICTLY from the user's words (format only)</span></li>
+        <li>Skill: <code>create_folder(...)</code> if new → <code>write_note(path, content, overwrite=False)</code></li>
+        <li>Skill: <code>rebuild_index(folder)</code> for the touched folder + parents</li>
+        <li>Skill: <code>get_backlinks</code> / <code>search</code> → proposes REAL <code>[[Related Topics]]</code> (user confirms)</li>
+        <li>Skill: emits ONE Mentor question</li>
+      </ol>
+
+      <p style="margin-top:1.4em">Every write crosses the MCP boundary. Claude decides; the server acts. Step 3 (dedupe-before-create) prevents duplicate-note sprawl and serves "build a connected knowledge base over time."</p>
+    </section>
+
+    <!-- 7. ERROR HANDLING -->
+    <section class="section" id="s7">
+      <div class="sec-head">
+        <span class="sec-num">§ 07</span>
+        <h2 class="sec-title">Error Handling</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th style="width:32%">Situation</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td><span class="warm-lead">Path escapes vault</span> (<code>..</code>, absolute)</td><td>Server rejects with a clear error; Claude surfaces it, does not retry blindly.</td></tr>
+            <tr><td><span class="warm-lead">Write to existing path</span></td><td><code>overwrite=False</code> default → server errors <code>note_exists</code>; Claude must choose append / new title / explicit overwrite. No silent clobber.</td></tr>
+            <tr><td><span class="warm-lead">Malformed frontmatter</span> (hand-edit typo)</td><td>Parser is <strong>lenient</strong>: on YAML failure, return raw frontmatter + <code>frontmatter_error</code> flag instead of crashing. Note still indexes by body/headings/links; only metadata queries skip it. Honors "everything editable by hand."</td></tr>
+            <tr><td><span class="warm-lead">Note not found</span></td><td>Clear <code>not_found</code> error.</td></tr>
+            <tr><td><span class="warm-lead">Delete</span></td><td>Soft → moves to <code>.trash/</code>, recoverable. Never hard-delete in v0.1.</td></tr>
+            <tr><td><code>rebuild_index</code></td><td>Idempotent — safe to call repeatedly; pure function of directory contents.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout"><strong>Principle:</strong> the server fails <strong>loudly and recoverably</strong>, and never destroys user data. Structured errors let Claude react deliberately rather than paper over them.</div>
+    </section>
+
+    <!-- 8. NOTE TEMPLATE -->
+    <section class="section" id="s8">
+      <div class="sec-head">
+        <span class="sec-num">§ 08</span>
+        <h2 class="sec-title">Standard Note Template</h2>
+      </div>
+
+      <div class="code">
+        <div class="code-label">note template · markdown + YAML frontmatter</div>
+<pre><span class="kw">---</span>
+<span class="kw">title:</span>
+<span class="kw">category:</span>
+<span class="kw">status:</span>
+<span class="kw">confidence:</span>
+<span class="kw">created:</span>
+<span class="kw">updated:</span>
+<span class="kw">tags:</span>
+<span class="kw">source:</span>
+<span class="kw">---</span>
+
+<span class="dir"># Summary</span>
+A concise summary based only on the user's explanation.
+
+<span class="dir"># Explanation</span>
+The user's explanation. Preserve wording. Improve formatting only.
+
+<span class="dir"># Examples</span>
+Examples provided by the user.
+
+<span class="dir"># Related Topics</span>
+<span class="lk">[[Topic]]</span>
+<span class="lk">[[Topic]]</span>
+
+<span class="dir"># Questions I Still Have</span>
+Only genuine gaps inferred from the user's explanation. Do not invent gaps.
+
+<span class="dir"># Revision Questions</span>
+2–5 active-recall questions (e.g. "Explain this without looking.",
+"What problem does this solve?", "When should it NOT be used?").</pre>
+      </div>
+
+      <h3>Confidence scale</h3>
+      <div class="confidence">
+        <div class="conf"><span class="n">0</span><span class="t">never seen</span></div>
+        <div class="conf"><span class="n">1</span><span class="t">recognize the term</span></div>
+        <div class="conf"><span class="n">2</span><span class="t">understand basics</span></div>
+        <div class="conf"><span class="n">3</span><span class="t">can explain</span></div>
+        <div class="conf"><span class="n">4</span><span class="t">have built with it</span></div>
+        <div class="conf"><span class="n">5</span><span class="t">can teach it</span></div>
+      </div>
+
+      <h3>Metadata block <span style="font-weight:400;color:var(--ink-3)">(maintained per note)</span></h3>
+      <div class="chips">
+        <span class="chip">first_learned</span>
+        <span class="chip">last_reviewed</span>
+        <span class="chip">last_used</span>
+        <span class="chip">projects</span>
+        <span class="chip">related</span>
+        <span class="chip">difficulty</span>
+        <span class="chip">status</span>
+      </div>
+
+      <h3>Relationships <span style="font-weight:400;color:var(--ink-3)">a note may reference</span></h3>
+      <div class="chips">
+        <span class="chip is-rel">Prerequisites</span>
+        <span class="chip is-rel">Related Topics</span>
+        <span class="chip is-rel">Used By</span>
+        <span class="chip is-rel">Projects</span>
+        <span class="chip is-rel">Books</span>
+        <span class="chip is-rel">Videos</span>
+        <span class="chip is-rel">Articles</span>
+        <span class="chip is-rel">Examples</span>
+      </div>
+      <p style="font-family:var(--sans);font-size:14.5px;color:var(--ink-2)">The graph grows organically — never force connections.</p>
+    </section>
+
+    <!-- 9. VAULT STRUCTURE -->
+    <section class="section" id="s9">
+      <div class="sec-head">
+        <span class="sec-num">§ 09</span>
+        <h2 class="sec-title">Vault Structure <span class="thin">— placement map</span></h2>
+      </div>
+      <p>The skill reasons over this tree to place notes; folders are created lazily.</p>
+
+      <div class="code">
+        <div class="code-label">Engineering/ placement map</div>
+<pre><span class="dir">Engineering/</span>
+  <span class="dir">Foundations/</span> {DSA, Operating Systems, Networking, Databases, Concurrency}
+  <span class="dir">Languages/</span>   {Rust, Python, Go}
+  <span class="dir">AI/</span>          {LLMs, Agents, STT, TTS, RAG, Evaluation}
+  <span class="dir">Infrastructure/</span> {Docker, Kubernetes, Linux, Cloud, CI-CD}
+  <span class="dir">Distributed Systems/</span>
+  <span class="dir">Performance/</span>
+  <span class="dir">System Design/</span>
+  <span class="dir">Projects/</span>
+  <span class="dir">Career/</span></pre>
+      </div>
+
+      <p>Every directory may contain an <code>index.md</code> (navigation only): child folders, child notes, quick links, recently added. The skill calls <code>rebuild_index</code> when notes are added or moved.</p>
+    </section>
+
+    <!-- 10. SEARCH PHILOSOPHY -->
+    <section class="section" id="s10">
+      <div class="sec-head">
+        <span class="sec-num">§ 10</span>
+        <h2 class="sec-title">Search Philosophy</h2>
+      </div>
+      <p>Ranking priority (implemented deterministically in <code>search.py</code>):</p>
+      <ol class="ladder">
+        <li><span class="rank">1</span><span>exact titles</span><span class="bar"></span></li>
+        <li><span class="rank">2</span><span>aliases</span><span class="bar"></span></li>
+        <li><span class="rank">3</span><span>tags</span><span class="bar"></span></li>
+        <li><span class="rank">4</span><span>headings</span><span class="bar"></span></li>
+        <li><span class="rank">5</span><span>content</span><span class="bar"></span></li>
+        <li><span class="rank">6</span><span>linked notes</span><span class="bar"></span></li>
+      </ol>
+      <p>Goal: help Future Me rediscover knowledge quickly.</p>
+    </section>
+
+    <!-- 11. TESTING STRATEGY -->
+    <section class="section" id="s11">
+      <div class="sec-head">
+        <span class="sec-num">§ 11</span>
+        <h2 class="sec-title">Testing Strategy</h2>
+      </div>
+      <ul class="list">
+        <li><strong>Unit (pytest)</strong> against a temp-vault fixture, per module:
+          <ul>
+            <li><code>vault.py</code> — traversal rejection, root resolution</li>
+            <li><code>frontmatter.py</code> — parse/serialize round-trip <strong>including malformed input</strong> (no crash)</li>
+            <li><code>markdown.py</code> — heading + <code>[[wikilink]]</code> extraction</li>
+            <li><code>search.py</code> — <strong>ranking order asserted</strong> (title &gt; tag &gt; content), <code>find_by_metadata</code></li>
+            <li><code>links.py</code> — backlink resolution</li>
+            <li><code>index.py</code> — <code>rebuild_index</code> golden output + idempotency</li>
+            <li><code>notes.py</code> — overwrite-guard, soft-delete → <code>.trash/</code></li>
+          </ul>
+        </li>
+        <li><strong>Tool-contract tests</strong> — invoke each tool via FastMCP's in-process client; assert structured return shapes.</li>
+        <li><strong>Golden vault fixture</strong> — a tiny known vault (notes with deliberate links/tags) so search ranking + backlinks are asserted deterministically.</li>
+        <li><strong>Skill verification (manual, documented)</strong> — a scripted dry-run asserting the <em>tool-call sequence</em> of a learning session (placement → write → rebuild_index → mentor Q). Wording-preservation can't be unit-tested, so v0.1 ships a written end-to-end check: "learn X → note lands in the right folder, wording intact, index updated, exactly one mentor question."</li>
+      </ul>
+    </section>
+
+    <!-- 12. SCOPE -->
+    <section class="section" id="s12">
+      <div class="sec-head">
+        <span class="sec-num">§ 12</span>
+        <h2 class="sec-title">Scope</h2>
+      </div>
+      <div class="scope">
+        <div class="scope-card in">
+          <h4><span class="mk"></span> In scope · v0.1</h4>
+          <p>The <code>engram-mcp</code> server (structure-aware tools above) and the <code>engram</code> skill (learning-session workflow + mentor mode).</p>
+        </div>
+        <div class="scope-card out">
+          <h4><span class="mk"></span> Explicitly out of scope</h4>
+          <p style="margin-bottom:10px">Deferred per the vision's "Future Features":</p>
+          <div class="deferred">
+            <span class="chip">embeddings</span>
+            <span class="chip">semantic / vector search</span>
+            <span class="chip">vector database</span>
+            <span class="chip">spaced repetition</span>
+            <span class="chip">knowledge-graph visualization</span>
+            <span class="chip">AI memory</span>
+            <span class="chip">agentic planning</span>
+            <span class="chip">flashcards</span>
+            <span class="chip">GitHub integration</span>
+            <span class="chip">automatic project linking</span>
+            <span class="chip">daily review</span>
+            <span class="chip">learning analytics</span>
+          </div>
+          <p class="note">Do not implement unless explicitly requested.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. SUCCESS CRITERIA -->
+    <section class="section" id="s13">
+      <div class="sec-head">
+        <span class="sec-num">§ 13</span>
+        <h2 class="sec-title">Success Criteria</h2>
+      </div>
+      <p>Engram succeeds if the user can:</p>
+      <ul class="success">
+        <li>learn continuously without worrying about formatting;</li>
+        <li>explain concepts naturally;</li>
+        <li>trust that the AI captured their understanding accurately;</li>
+        <li>retrieve their own thoughts easily months later;</li>
+        <li>and watch the knowledge base grow organically — friction removed, not complexity added.</li>
+      </ul>
+    </section>
+
+    <!-- mobile contents (hidden on desktop) -->
+    <nav class="toc-mobile">
+      <details>
+        <summary>Contents</summary>
+        <ol>
+          <li><a href="#s1"><span class="sn">1</span>Mission</a></li>
+          <li><a href="#s2"><span class="sn">2</span>Core Principles</a></li>
+          <li><a href="#s3"><span class="sn">3</span>Architecture</a></li>
+          <li><a href="#s4"><span class="sn">4</span>engram-mcp</a></li>
+          <li><a href="#s5"><span class="sn">5</span>engram skill</a></li>
+          <li><a href="#s6"><span class="sn">6</span>Data Flow</a></li>
+          <li><a href="#s7"><span class="sn">7</span>Error Handling</a></li>
+          <li><a href="#s8"><span class="sn">8</span>Note Template</a></li>
+          <li><a href="#s9"><span class="sn">9</span>Vault Structure</a></li>
+          <li><a href="#s10"><span class="sn">10</span>Search</a></li>
+          <li><a href="#s11"><span class="sn">11</span>Testing</a></li>
+          <li><a href="#s12"><span class="sn">12</span>Scope</a></li>
+          <li><a href="#s13"><span class="sn">13</span>Success</a></li>
+        </ol>
+      </details>
+    </nav>
+
+  </main>
+</div>
+</div>
+
+<!-- ===================== COLOPHON ===================== -->
+<footer class="colophon">
+  <div class="page">
+    <div class="seal" aria-hidden="true"><span></span></div>
+    <blockquote>Engram exists to preserve my thinking, not replace it.</blockquote>
+    <div class="end">End of spec · v0.1 · 2026-06-28</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var links = Array.prototype.slice.call(document.querySelectorAll('.spine a[data-spy]'));
+  var sections = links.map(function(a){ return document.getElementById(a.getAttribute('data-spy')); }).filter(Boolean);
+  var progress = document.getElementById('spineProgress');
+  if(!sections.length) return;
+
+  function setActive(id){
+    links.forEach(function(a){
+      a.classList.toggle('is-active', a.getAttribute('data-spy') === id);
+    });
+  }
+
+  // Scroll-spy: the deepest section whose top has passed the focus line wins.
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var focus = window.innerHeight * 0.30;
+    var current = sections[0];
+    for(var i=0;i<sections.length;i++){
+      if(sections[i].getBoundingClientRect().top <= focus){ current = sections[i]; }
+    }
+    setActive(current.id);
+
+    // progress fill along the trace
+    if(progress){
+      var doc = document.documentElement;
+      var max = (doc.scrollHeight - window.innerHeight) || 1;
+      var pct = Math.min(1, Math.max(0, window.scrollY / max));
+      progress.style.height = (pct * 100) + '%';
+    }
+  }
+  function onScroll(){
+    if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+
+  // Smooth focus handling for keyboard users / reduced motion is handled by CSS scroll-behavior.
+  links.forEach(function(a){
+    a.addEventListener('click', function(){ setActive(a.getAttribute('data-spy')); });
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>
