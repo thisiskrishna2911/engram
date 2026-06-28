@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engram v0.1 — DX Overview</title>
+<meta name="description" content="Engram — DX overview, v0.1. What the MCP API feels like to use: from /engram to a note your future self can read.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ENGRAM — DX overview · shares the design-spec identity (v0.1)
+   Type as duality:  serif = human voice · sans = structure · mono = machine
+   Trace accent: a single deep teal-cyan, the memory-trace edge.
+   The DX-only beat: a call → return diptych (square in · circle out).
+   ============================================================ */
+
+:root{
+  --paper:      #eef0f3;   /* cool engineering-notebook paper */
+  --paper-tint: #e6eaee;
+  --surface:    #ffffff;   /* lifted index-card / code surface */
+  --surface-2:  #f7f9fb;
+
+  --ink:    #1b2733;       /* primary ink */
+  --ink-2:  #45586a;       /* secondary */
+  --ink-3:  #6c7d8d;       /* muted captions */
+
+  --line:   #d6dee5;       /* hairline */
+  --line-2: #e4eaef;
+
+  --teal:        #0e7a82;  /* trace — markers / fills */
+  --teal-deep:   #0a5b62;  /* trace — text / links (AA) */
+  --teal-bright: #16a3ab;  /* trace — glow / hover */
+  --teal-wash:   #e4f1f1;  /* trace — tint backgrounds */
+  --teal-line:   #b9dcdd;
+
+  --warm:   #9a6326;       /* sparingly: guardrail / caution lead */
+  --warm-wash:#f4ecdf;
+
+  --serif: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --sans:  'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --mono:  'IBM Plex Mono', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --maxw: 1180px;
+  --reading: 720px;
+}
+
+*{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:18px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+::selection{ background:var(--teal-wash); color:var(--teal-deep); }
+
+a{ color:var(--teal-deep); text-decoration:none; }
+a:hover{ color:var(--teal-bright); }
+
+:focus-visible{
+  outline:2.5px solid var(--teal-bright);
+  outline-offset:3px;
+  border-radius:3px;
+}
+
+/* ---------- layout shell ---------- */
+.page{ max-width:var(--maxw); margin:0 auto; padding:0 clamp(20px,5vw,56px); }
+
+/* ============================================================
+   MASTHEAD
+   ============================================================ */
+.masthead{
+  position:relative;
+  padding:clamp(40px,7vw,84px) 0 clamp(30px,4vw,46px);
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.masthead::before{   /* faint dot-grid: notebook + knowledge-graph nodes */
+  content:"";
+  position:absolute; inset:0;
+  background-image:radial-gradient(var(--line) 1.1px, transparent 1.1px);
+  background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.55), transparent 78%);
+          mask-image:linear-gradient(180deg, rgba(0,0,0,.55), transparent 78%);
+  opacity:.5;
+  pointer-events:none;
+}
+.masthead > *{ position:relative; }
+
+.rule-top{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3);
+  padding-bottom:clamp(30px,5vw,56px);
+}
+.rule-top .node{ color:var(--teal); }
+
+.wordmark{
+  display:flex; align-items:baseline; gap:.5ch;
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:clamp(46px,9vw,78px);
+  letter-spacing:-.025em;
+  line-height:.95;
+  color:var(--ink);
+  margin:0;
+}
+.wordmark .dot{
+  width:.34ch; height:.34ch; align-self:flex-end;
+  background:var(--teal); border-radius:50%;
+  margin-bottom:.18em; flex:0 0 auto;
+}
+.subtitle{
+  font-family:var(--mono);
+  font-size:clamp(13px,1.7vw,15px);
+  letter-spacing:.04em;
+  color:var(--teal-deep);
+  margin:.9rem 0 0;
+  font-weight:500;
+}
+.lede{
+  font-family:var(--serif);
+  font-size:clamp(20px,2.7vw,26px);
+  line-height:1.4;
+  color:var(--ink-2);
+  max-width:34ch;
+  margin:clamp(22px,3vw,30px) 0 0;
+  font-weight:400;
+}
+.lede em{ color:var(--ink); font-style:italic; }
+
+.meta{
+  display:flex; flex-wrap:wrap; gap:0;
+  margin-top:clamp(30px,4vw,46px);
+  border-top:1px solid var(--line);
+}
+.meta dl{
+  margin:0;
+  padding:16px clamp(20px,3vw,34px) 4px 0;
+  border-right:1px solid var(--line);
+  margin-right:clamp(20px,3vw,34px);
+}
+.meta dl:last-child{ border-right:0; margin-right:0; }
+.meta dt{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:5px;
+}
+.meta dd{
+  margin:0; font-family:var(--sans); font-size:14.5px; font-weight:500; color:var(--ink);
+}
+.meta dd .accent{ color:var(--teal-deep); }
+.meta dd code{ font-size:13px; }
+
+/* ============================================================
+   HERO — the thesis: you speak, the machine writes it down
+   ============================================================ */
+.hero{
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--paper),var(--surface-2));
+  padding:clamp(30px,4.5vw,52px) 0;
+}
+.hero .frame{ max-width:var(--reading); margin:0 auto; }
+.hero .prompt{ margin:0; }
+.hero-cap{
+  margin:20px auto 0; max-width:54ch; text-align:center;
+  font-family:var(--serif); font-style:italic;
+  font-size:clamp(19px,2.4vw,24px); line-height:1.42; color:var(--ink);
+}
+.hero-cap em{ color:var(--teal-deep); font-style:italic; }
+
+/* ---------- mobile contents ---------- */
+.toc-mobile{ display:none; }
+
+/* ============================================================
+   READING LAYOUT  (spine + content)
+   ============================================================ */
+.layout{
+  display:grid;
+  grid-template-columns:212px minmax(0,1fr);
+  gap:clamp(30px,5vw,76px);
+  padding:clamp(40px,5vw,64px) 0 0;
+}
+
+/* ----- the SPINE : a memory-trace TOC with nodes + scroll progress ----- */
+.spine{
+  position:sticky; top:32px; align-self:start;
+  max-height:calc(100vh - 64px);
+  overflow:auto;
+  padding:4px 0 24px 0;
+  scrollbar-width:thin;
+}
+.spine-label{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); padding-left:24px; margin-bottom:18px;
+}
+.spine-track{ position:relative; }
+.spine-track::before{   /* the dormant trace line */
+  content:""; position:absolute; left:5px; top:8px; bottom:8px; width:2px;
+  background:var(--line);
+}
+.spine-progress{   /* the written-in trace (scroll progress) */
+  position:absolute; left:5px; top:8px; width:2px;
+  height:0; background:linear-gradient(var(--teal-bright),var(--teal));
+  transition:height .12s linear;
+}
+@media (prefers-reduced-motion: reduce){ .spine-progress{ transition:none; } }
+
+.spine a{
+  position:relative; display:flex; gap:14px; align-items:baseline;
+  padding:7px 0 7px 24px;
+  font-family:var(--sans); font-size:13px; line-height:1.3;
+  color:var(--ink-3);
+  transition:color .18s ease;
+}
+.spine a .sn{ font-family:var(--mono); font-size:11px; color:var(--ink-3); flex:0 0 auto; min-width:1.4ch; }
+.spine a::before{   /* node */
+  content:""; position:absolute; left:1.5px; top:12px;
+  width:9px; height:9px; border-radius:50%;
+  background:var(--paper); border:2px solid var(--line);
+  transition:all .2s ease; z-index:1;
+}
+.spine a:hover{ color:var(--ink); }
+.spine a:hover::before{ border-color:var(--teal); }
+.spine a.is-active{ color:var(--teal-deep); font-weight:600; }
+.spine a.is-active .sn{ color:var(--teal-deep); }
+.spine a.is-active::before{
+  background:var(--teal); border-color:var(--teal);
+  box-shadow:0 0 0 4px var(--teal-wash);
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+.content{ min-width:0; max-width:var(--reading); }
+
+.section{ padding-bottom:clamp(48px,6vw,76px); }
+.section + .section{ border-top:1px solid var(--line-2); padding-top:clamp(40px,5vw,60px); }
+
+.sec-head{ margin:0 0 clamp(18px,2.4vw,26px); }
+.sec-num{
+  display:inline-block;
+  font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--teal-deep); font-weight:500;
+  margin-bottom:8px;
+}
+h2.sec-title{
+  font-family:var(--sans); font-weight:600;
+  font-size:clamp(25px,3.4vw,32px); letter-spacing:-.018em; line-height:1.15;
+  color:var(--ink); margin:0;
+}
+h2.sec-title .thin{ color:var(--ink-3); font-weight:400; }
+
+h3{
+  font-family:var(--sans); font-weight:600;
+  font-size:clamp(17px,2vw,19px); letter-spacing:-.01em;
+  color:var(--ink); margin:clamp(30px,4vw,42px) 0 14px;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); margin:clamp(28px,3.5vw,38px) 0 12px; font-weight:500;
+}
+
+p{ margin:0 0 1.15em; }
+.content p:last-child{ margin-bottom:0; }
+strong{ color:var(--ink); font-weight:600; }
+em{ font-style:italic; }
+
+/* inline code = a touch of the machine */
+code{
+  font-family:var(--mono); font-size:.87em;
+  background:var(--teal-wash); color:var(--teal-deep);
+  padding:.08em .4em; border-radius:4px;
+  border:1px solid var(--teal-line);
+  white-space:normal; overflow-wrap:anywhere;
+}
+
+/* ---------- pull quotes (the ethos) ---------- */
+.pquote{
+  margin:clamp(26px,3.5vw,38px) 0;
+  padding:4px 0 4px clamp(22px,3vw,32px);
+  border-left:3px solid var(--teal);
+  font-family:var(--serif); font-style:italic;
+  font-size:clamp(20px,2.6vw,25px); line-height:1.42;
+  color:var(--ink);
+}
+.pquote .src{
+  display:block; margin-top:14px;
+  font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.04em;
+  color:var(--ink-3);
+}
+
+/* ---------- generic bullet lists ---------- */
+ul.list{ list-style:none; margin:clamp(8px,1.5vw,14px) 0; padding:0; }
+ul.list > li{
+  position:relative; padding:7px 0 7px 24px;
+  font-family:var(--sans); font-size:15px; color:var(--ink-2); line-height:1.55;
+}
+ul.list > li::before{
+  content:""; position:absolute; left:3px; top:15px;
+  width:7px; height:7px; border-radius:50%;
+  background:var(--teal); opacity:.85;
+}
+ul.list > li strong{ color:var(--ink); }
+
+/* ============================================================
+   CODE / PRE  + the call → return diptych
+   ============================================================ */
+.code{
+  position:relative;
+  margin:clamp(20px,2.6vw,28px) 0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+.code-label{
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3);
+  padding:11px 18px; border-bottom:1px solid var(--line-2);
+  background:var(--surface-2);
+}
+.code-label::before{ content:""; width:7px; height:7px; border-radius:2px; background:var(--teal); }
+.code-label .tail{ margin-left:auto; letter-spacing:.08em; color:var(--ink-3); opacity:.85; }
+.code pre{
+  margin:0; padding:18px 20px; overflow-x:auto;
+  font-family:var(--mono); font-size:13px; line-height:1.72; color:var(--ink);
+  tab-size:2;
+}
+.code pre .cm{ color:var(--ink-3); }        /* comments / illustrative annotations */
+.code pre .kw{ color:var(--teal-deep); }    /* frontmatter keys */
+.code pre .lk{ color:var(--teal); font-weight:500; }  /* [[wikilinks]] */
+.code pre .dir{ color:var(--teal-deep); font-weight:500; }   /* # headings / dirs */
+.code pre .str{ color:var(--ink-2); }       /* string literals */
+
+/* the diptych: one frame, CALL stacked over RETURN, square-in · circle-out */
+.exchange{
+  margin:clamp(20px,2.6vw,28px) 0;
+  border:1px solid var(--line); border-radius:10px; overflow:hidden;
+  background:var(--surface);
+}
+.exchange .code{ margin:0; border:0; border-radius:0; }
+.exchange .code + .code{ border-top:1px solid var(--line); }
+.code--return{ background:var(--surface-2); }
+.code--return .code-label{ color:var(--teal-deep); background:#eef6f6; }
+.code--return .code-label::before{ border-radius:50%; background:var(--teal-deep); }
+
+/* ============================================================
+   THE DARK PROMPT  (the /engram moment)
+   ============================================================ */
+.prompt{
+  background:#152029; border-radius:10px; padding:18px 22px;
+  font-family:var(--mono); font-size:13.5px; line-height:1.7; color:#cfe3e4;
+  margin:clamp(20px,2.6vw,28px) 0; border:1px solid #243441;
+  white-space:pre-wrap; overflow-wrap:anywhere;
+}
+.prompt .you{ color:#7fd3d9; font-weight:600; }
+.prompt .sys{ color:#5fbfc6; font-weight:600; }
+.prompt .cmd{ color:#e8c98a; }
+.prompt .said{ color:#aebfca; }
+
+/* ============================================================
+   SEQUENCE DIAGRAM  (the learning session: steps → tool calls)
+   the one diagram — it branches, so it is shown, not told
+   ============================================================ */
+.seq{ position:relative; margin:clamp(22px,3vw,34px) 0; }
+.seq-track{ position:relative; }
+.seq-track::before{
+  content:""; position:absolute; left:15px; top:16px; bottom:16px; width:2px;
+  background:var(--teal-line);
+}
+.seq-step{ position:relative; display:grid; grid-template-columns:32px minmax(0,1fr); gap:16px; padding:0 0 20px; }
+.seq-step:last-child{ padding-bottom:0; }
+.seq-node{
+  width:32px; height:32px; border-radius:50%;
+  display:grid; place-items:center;
+  font-family:var(--mono); font-size:12px; font-weight:600; color:#fff;
+  background:var(--teal); box-shadow:0 0 0 4px var(--paper); z-index:1; position:relative;
+}
+.seq-body{ padding-top:3px; min-width:0; }
+.seq-phase{ font-family:var(--sans); font-weight:600; font-size:15px; color:var(--ink); }
+.seq-phase .ph-note{ font-weight:400; color:var(--ink-3); font-size:13.5px; }
+.seq-calls{ display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
+.seq-call{
+  font-family:var(--mono); font-size:12.5px; color:var(--teal-deep);
+  background:var(--teal-wash); border:1px solid var(--teal-line); border-radius:6px;
+  padding:5px 9px;
+}
+.seq-call.muted{ color:var(--ink-2); background:var(--surface-2); border-color:var(--line); }
+.seq-ann{ display:block; margin-top:9px; font-family:var(--sans); font-size:13px; font-style:italic; color:var(--ink-3); }
+
+/* the fork: lazy-create vs already-exists */
+.seq-fork{ margin-top:13px; display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+.branch{ border-radius:9px; padding:12px 14px; border:1px solid var(--line); background:var(--surface); }
+.branch .blabel{
+  font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); display:flex; align-items:center; gap:8px; margin-bottom:9px;
+}
+.branch .blabel .mk{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+.branch .bcall{ font-family:var(--mono); font-size:12.5px; color:var(--ink); line-height:1.55; }
+.branch .bsub{ font-family:var(--sans); font-size:12.5px; color:var(--ink-3); margin-top:5px; }
+.branch.take{ border-color:var(--teal-line); background:linear-gradient(180deg,var(--surface),var(--teal-wash)); }
+.branch.take .blabel{ color:var(--teal-deep); }
+.branch.take .blabel .mk{ background:var(--teal); }
+.branch.alt .blabel .mk{ background:transparent; border:1.5px solid var(--ink-3); }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.table-wrap{ margin:clamp(18px,2.4vw,26px) 0; overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+table.tbl{ width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14.5px; background:var(--surface); }
+.tbl thead th{
+  text-align:left; font-weight:600; color:var(--ink);
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  padding:13px 18px; background:var(--surface-2); border-bottom:1.5px solid var(--line);
+  white-space:nowrap;
+}
+.tbl tbody td{
+  padding:13px 18px; border-bottom:1px solid var(--line-2);
+  color:var(--ink-2); line-height:1.5; vertical-align:top;
+}
+.tbl tbody tr:last-child td{ border-bottom:0; }
+.tbl tbody tr:hover{ background:var(--surface-2); }
+.tbl td:first-child{ color:var(--ink); }
+.tbl td code{ white-space:normal; }
+.tbl .col-sig{ width:42%; }
+.tbl tr.grp td{
+  background:var(--surface-2); color:var(--ink-3);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:500; padding:10px 18px;
+}
+.tbl tr.grp:hover td{ background:var(--surface-2); }
+
+/* ============================================================
+   CALLOUT  +  WHEN-TO-USE
+   ============================================================ */
+.callout{
+  border-left:3px solid var(--teal); background:var(--teal-wash);
+  padding:16px 20px; border-radius:0 10px 10px 0; margin:clamp(18px,2.4vw,26px) 0;
+  font-family:var(--sans); font-size:14.5px; color:var(--ink); line-height:1.6;
+}
+.callout code{ background:var(--surface); }
+.when{
+  margin:clamp(18px,2.4vw,26px) 0;
+  border:1px dashed var(--teal-line); border-radius:10px;
+  background:var(--surface); padding:15px 18px;
+}
+.when .wlabel{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--teal-deep); margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.when .wlabel::before{ content:""; width:8px; height:8px; border-radius:50%; background:var(--teal); }
+.when p{ font-family:var(--sans); font-size:14px; color:var(--ink-2); line-height:1.6; margin:0; }
+.when p strong{ color:var(--ink); }
+
+.warm-lead{ color:var(--warm); font-weight:600; }
+
+/* ---------- chips ---------- */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; margin:clamp(12px,1.8vw,18px) 0; }
+.chip{
+  font-family:var(--mono); font-size:12.5px;
+  padding:6px 12px; border-radius:7px;
+  background:var(--surface); border:1px solid var(--line); color:var(--ink-2);
+}
+
+/* ---------- confidence scale (reused from spec) ---------- */
+.confidence{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:6px;
+  margin:clamp(16px,2.2vw,22px) 0;
+}
+.conf{
+  border:1px solid var(--line); border-radius:9px; padding:12px 10px 10px; text-align:center;
+  background:var(--surface);
+}
+.conf .n{ font-family:var(--mono); font-size:20px; font-weight:600; line-height:1; color:var(--teal-deep); }
+.conf .t{ font-family:var(--sans); font-size:11.5px; color:var(--ink-2); margin-top:7px; line-height:1.3; display:block; }
+.conf.is-on{ border-color:var(--teal); box-shadow:0 0 0 3px var(--teal-wash); }
+.conf:nth-child(1){ background:linear-gradient(180deg,var(--surface),#fbfcfd); }
+.conf:nth-child(2){ background:linear-gradient(180deg,var(--surface),#f3f9f9); }
+.conf:nth-child(3){ background:linear-gradient(180deg,var(--surface),#e9f4f4); }
+.conf:nth-child(4){ background:linear-gradient(180deg,var(--surface),#ddf0f0); }
+.conf:nth-child(5){ background:linear-gradient(180deg,var(--surface),#cfeaeb); }
+.conf:nth-child(6){ background:linear-gradient(180deg,var(--surface),#bfe3e4); }
+
+/* ---------- edge cards (safety) ---------- */
+.edge{
+  margin:clamp(16px,2.2vw,22px) 0;
+  border:1px solid var(--line); border-radius:11px; overflow:hidden; background:var(--surface);
+}
+.edge-head{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  padding:14px 18px; border-bottom:1px solid var(--line-2); background:var(--surface-2);
+}
+.edge-head .etag{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--warm); background:var(--warm-wash); border:1px solid #e6d4b6;
+  padding:3px 9px; border-radius:20px; flex:0 0 auto;
+}
+.edge-head h4{ margin:0; font-family:var(--sans); font-size:15.5px; font-weight:600; color:var(--ink); }
+.edge .code{ margin:0; border:0; border-radius:0; }
+.edge .see{
+  padding:13px 18px; font-family:var(--sans); font-size:14px; color:var(--ink-2); line-height:1.6;
+  border-top:1px solid var(--line-2);
+}
+.edge .see strong{ color:var(--ink); }
+
+/* ============================================================
+   COLOPHON
+   ============================================================ */
+.colophon{
+  border-top:1px solid var(--line);
+  margin-top:clamp(20px,4vw,40px);
+  padding:clamp(40px,6vw,72px) 0 clamp(50px,7vw,90px);
+  text-align:center;
+}
+.colophon .seal{
+  width:34px; height:34px; margin:0 auto 22px; border-radius:50%;
+  background:var(--teal-wash); border:1px solid var(--teal-line);
+  display:grid; place-items:center;
+}
+.colophon .seal span{ width:9px; height:9px; border-radius:50%; background:var(--teal); }
+.colophon blockquote{
+  margin:0 auto; max-width:30ch;
+  font-family:var(--serif); font-style:italic; font-size:clamp(19px,2.4vw,23px);
+  line-height:1.42; color:var(--ink);
+}
+.colophon .end{
+  margin-top:26px; font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:920px){
+  .layout{ grid-template-columns:1fr; gap:0; padding-top:clamp(28px,5vw,40px); }
+  .spine{ display:none; }
+  .content{ max-width:none; }
+  .toc-mobile{ display:block; margin-top:8px; border-top:1px solid var(--line); }
+  .toc-mobile summary{
+    cursor:pointer; list-style:none; padding:18px 0 18px 4px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .toc-mobile summary::-webkit-details-marker{ display:none; }
+  .toc-mobile summary::after{ content:"+"; font-size:16px; color:var(--teal); }
+  .toc-mobile[open] summary::after{ content:"–"; }
+  .toc-mobile ol{ margin:0 0 18px; padding:0 0 0 4px; list-style:none; columns:2; column-gap:24px; }
+  .toc-mobile li{ break-inside:avoid; padding:6px 0; }
+  .toc-mobile a{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); }
+  .toc-mobile .sn{ font-family:var(--mono); font-size:11px; color:var(--teal-deep); margin-right:8px; }
+}
+@media (max-width:680px){
+  body{ font-size:17px; }
+  .confidence{ grid-template-columns:repeat(3,1fr); }
+  .seq-fork{ grid-template-columns:1fr; }
+  .meta dl{ border-right:0; margin-right:0; padding-right:0; }
+}
+
+@media print{
+  body{ background:#fff; font-size:11pt; }
+  .spine, .toc-mobile, .masthead::before{ display:none; }
+  .layout{ grid-template-columns:1fr; }
+  .section{ break-inside:avoid; }
+  .prompt{ background:#fff; color:#1b2733; border-color:#c9d3da; }
+  a{ color:inherit; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== MASTHEAD ===================== -->
+<header class="masthead">
+  <div class="page">
+    <div class="rule-top">
+      <span><span class="node">●</span>&nbsp; ENGRAM · ENGINEERING MEMORY SYSTEM</span>
+      <span>DX OVERVIEW · v0.1</span>
+    </div>
+    <h1 class="wordmark">Engram<span class="dot" aria-hidden="true"></span></h1>
+    <p class="subtitle">v0.1 — Developer Experience</p>
+    <p class="lede">How the API feels in the hand — from a half-formed <em>"I learned…"</em> to a note your future self can actually read.</p>
+
+    <div class="meta">
+      <dl><dt>Scope</dt><dd><span class="accent">DX preview</span> — Engram v0.1 MCP API (planned)</dd></dl>
+      <dl><dt>Transport</dt><dd>stdio · FastMCP</dd></dl>
+      <dl><dt>Entry</dt><dd><code>/engram</code> · "I learned…"</dd></dl>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" aria-label="The felt experience">
+  <div class="page">
+    <div class="frame">
+      <div class="prompt"><span class="you">you</span>  I learned how Tokio steals work between worker threads to keep them all busy…
+<span class="sys">engram</span>  listening — writing it down in <span class="said">your</span> words, not its own</div>
+      <p class="hero-cap">Say <em>"I learned…"</em> and Engram starts writing. You explain; it files the understanding. The AI is a <em>scribe</em>, never an author.</p>
+    </div>
+  </div>
+</section>
+
+<div class="page">
+<div class="layout">
+
+  <!-- ===================== SPINE / TOC ===================== -->
+  <nav class="spine" aria-label="Table of contents">
+    <div class="spine-label">Contents</div>
+    <div class="spine-track">
+      <div class="spine-progress" id="spineProgress" aria-hidden="true"></div>
+      <a href="#s1" data-spy="s1"><span class="sn">1</span><span>Setup &amp; first run</span></a>
+      <a href="#s2" data-spy="s2"><span class="sn">2</span><span>A learning session</span></a>
+      <a href="#s3" data-spy="s3"><span class="sn">3</span><span>Rediscovery</span></a>
+      <a href="#s4" data-spy="s4"><span class="sn">4</span><span>Maintaining the vault</span></a>
+      <a href="#s5" data-spy="s5"><span class="sn">5</span><span>Safety behaviors</span></a>
+      <a href="#s6" data-spy="s6"><span class="sn">⌘</span><span>API cheat sheet</span></a>
+    </div>
+  </nav>
+
+  <!-- ===================== CONTENT ===================== -->
+  <main class="content">
+
+    <!-- 1 · SETUP -->
+    <section class="section" id="s1">
+      <div class="sec-head">
+        <span class="sec-num">Flow 01 · Setup</span>
+        <h2 class="sec-title">Setup &amp; first run</h2>
+      </div>
+
+      <p>Engram is two pieces that never overlap: the <strong><code>engram</code> skill</strong> does all the thinking, and the <strong><code>engram-mcp</code> server</strong> does all the touching of files. You point the server at a folder, register it once, and then talk to the skill.</p>
+
+      <div class="callout">
+        <strong>Reading these snippets.</strong> Calls are written in Python form — <code>write_note(path=…, content=…, overwrite=False)</code> — to mirror the server's tool signatures one-to-one. In practice Claude issues them as <strong>MCP tool calls over stdio</strong> (FastMCP); you almost never type them yourself. Returns are shown as dicts and tagged <code># illustrative shape — confirmed on implementation</code>: the spec pins tool <em>names and arguments</em>, not exact return schemas.
+      </div>
+
+      <h3>1 · Point Engram at a vault</h3>
+      <p>The server reads and writes one folder, set by <code>ENGRAM_VAULT</code>. Omit it and Engram uses <code>engram-data/</code>. The vault is plain Markdown — Obsidian-compatible, hand-editable, no lock-in.</p>
+
+      <div class="code">
+        <div class="code-label">shell <span class="tail">env</span></div>
+<pre><span class="cm"># Point Engram at a vault — omit to use the default: engram-data/</span>
+export ENGRAM_VAULT="$HOME/engram-data"</pre>
+      </div>
+
+      <h3>2 · Register the server (once)</h3>
+      <p>The server speaks MCP over <strong>stdio</strong>, so Claude launches it as a child process. Register it in your Claude MCP config and forget it exists.</p>
+
+      <div class="code">
+        <div class="code-label">claude mcp config <span class="tail">illustrative</span></div>
+<pre>{
+  <span class="kw">"mcpServers"</span>: {
+    <span class="kw">"engram"</span>: {
+      <span class="kw">"command"</span>: <span class="str">"engram-mcp"</span>,        <span class="cm"># illustrative launch command</span>
+      <span class="kw">"env"</span>: { <span class="kw">"ENGRAM_VAULT"</span>: <span class="str">"~/engram-data"</span> }
+    }
+  }
+}</pre>
+      </div>
+
+      <h3>3 · Open the skill</h3>
+      <p>Everything human happens through <code>/engram</code>. It also auto-triggers the moment you say <em>"I learned…"</em>, so on most days you never type the command at all.</p>
+
+      <div class="prompt"><span class="you">you</span>  <span class="cmd">/engram</span></div>
+
+      <p>On a brand-new vault there is nothing to list — folders are created lazily, only when a note needs them. A first peek is honest about that:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">over stdio</span></div>
+<pre>list_dir(path=".")</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"path"</span>: <span class="str">"."</span>,
+    <span class="kw">"folders"</span>: [],
+    <span class="kw">"notes"</span>: [],   <span class="cm"># a fresh vault is empty; the tree below is a map, not a scaffold</span>
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <div class="when">
+        <div class="wlabel">When to set <code>ENGRAM_VAULT</code></div>
+        <p>Set it once per machine to keep your vault outside the repo (e.g. <code>$HOME/engram-data</code>). Leave it unset for a throwaway or per-project vault that lives at <strong><code>engram-data/</code></strong> in the working directory.</p>
+      </div>
+    </section>
+
+    <!-- 2 · LEARNING SESSION (HERO) -->
+    <section class="section" id="s2">
+      <div class="sec-head">
+        <span class="sec-num">Flow 02 · The hero flow</span>
+        <h2 class="sec-title">A learning session, end to end</h2>
+      </div>
+
+      <p>This is the whole reason Engram exists. You type <code>/engram</code> and explain Tokio's work-stealing scheduler in your own words — no headings, no frontmatter, no thinking about Markdown. Engram decides where it belongs, captures <em>your</em> sentences, links it into what you already know, and asks you exactly one good question back.</p>
+
+      <div class="prompt"><span class="you">you</span> <span class="cmd">/engram</span>
+<span class="said">"Each Tokio worker thread has its own local run queue. When a worker drains
+its queue it steals a batch of tasks from the back of another worker's queue
+instead of sitting idle. Tasks spawned from outside the runtime go on a global
+injector queue. The whole point is to spread load without a single global lock
+becoming the bottleneck."</span></div>
+
+      <p>Behind that one message, the skill runs a fixed sequence of MCP calls. It branches once — at dedupe — depending on whether a related note already exists:</p>
+
+      <!-- THE diagram: steps -> tool calls, with the dedupe / lazy-create branch -->
+      <div class="seq" role="img" aria-label="Learning-session sequence. 1: parse intent. 2: dedupe via search and list_dir, which forks — no match leads to create_folder then write_note; a match leads to append_note or a new title. 3: write_note with overwrite False. 4: rebuild_index. 5: connect via get_backlinks and search to propose real links. 6: one mentor question.">
+        <div class="seq-track">
+
+          <div class="seq-step">
+            <div class="seq-node">1</div>
+            <div class="seq-body">
+              <div class="seq-phase">Parse intent <span class="ph-note">— topic, explanation, optional source / tags</span></div>
+              <span class="seq-ann">Pure reasoning in the skill. No file is touched yet.</span>
+            </div>
+          </div>
+
+          <div class="seq-step">
+            <div class="seq-node">2</div>
+            <div class="seq-body">
+              <div class="seq-phase">Dedupe <span class="ph-note">— is this already in the vault?</span></div>
+              <div class="seq-calls">
+                <span class="seq-call">search(query, limit)</span>
+                <span class="seq-call">list_dir(folder)</span>
+              </div>
+              <div class="seq-fork">
+                <div class="branch take">
+                  <div class="blabel"><span class="mk"></span> No match → capture new</div>
+                  <div class="bcall">create_folder(path)</div>
+                  <div class="bsub">Lazy — only if the folder doesn't exist yet.</div>
+                </div>
+                <div class="branch alt">
+                  <div class="blabel"><span class="mk"></span> Match → deepen existing</div>
+                  <div class="bcall">append_note(…) <span style="color:var(--ink-3)">/</span> new title</div>
+                  <div class="bsub">The edge variant below.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="seq-step">
+            <div class="seq-node">3</div>
+            <div class="seq-body">
+              <div class="seq-phase">Capture <span class="ph-note">— fill the template strictly from your words</span></div>
+              <div class="seq-calls">
+                <span class="seq-call">write_note(path, content, overwrite=False)</span>
+              </div>
+              <span class="seq-ann">overwrite=False refuses to clobber — capture can never overwrite by accident.</span>
+            </div>
+          </div>
+
+          <div class="seq-step">
+            <div class="seq-node">4</div>
+            <div class="seq-body">
+              <div class="seq-phase">Re-index <span class="ph-note">— rewrite the folder's index.md</span></div>
+              <div class="seq-calls">
+                <span class="seq-call">rebuild_index(folder)</span>
+              </div>
+              <span class="seq-ann">Idempotent — a pure function of directory contents.</span>
+            </div>
+          </div>
+
+          <div class="seq-step">
+            <div class="seq-node">5</div>
+            <div class="seq-body">
+              <div class="seq-phase">Connect <span class="ph-note">— propose only <em>real</em> [[links]]</span></div>
+              <div class="seq-calls">
+                <span class="seq-call">get_backlinks(note)</span>
+                <span class="seq-call">search(query, limit)</span>
+              </div>
+              <span class="seq-ann">Links are drawn from actual hits, then you confirm them — never invented.</span>
+            </div>
+          </div>
+
+          <div class="seq-step">
+            <div class="seq-node">6</div>
+            <div class="seq-body">
+              <div class="seq-phase">Mentor <span class="ph-note">— exactly one question, never a lecture</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <h3>The calls, with their returns</h3>
+      <p>First the dedupe. Nothing matches, and the Rust folder doesn't exist yet — both facts point at "create new":</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">dedupe</span></div>
+<pre>search(query=<span class="str">"work stealing scheduler"</span>, limit=5)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"query"</span>: <span class="str">"work stealing scheduler"</span>,
+    <span class="kw">"hits"</span>: [],   <span class="cm"># nothing yet — safe to create a fresh note</span>
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">dedupe</span></div>
+<pre>list_dir(path=<span class="str">"Engineering/Languages/Rust"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"path"</span>: <span class="str">"Engineering/Languages/Rust"</span>,
+    <span class="kw">"error"</span>: <span class="str">"not_found"</span>,   <span class="cm"># lazy — the folder is born with the first note</span>
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <p>So the skill creates the folder (nested, lazily) and writes the note. <code>create_folder</code> reports every level it had to make:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">lazy create</span></div>
+<pre>create_folder(path=<span class="str">"Engineering/Languages/Rust"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"created"</span>: [
+        <span class="str">"Engineering"</span>,
+        <span class="str">"Engineering/Languages"</span>,
+        <span class="str">"Engineering/Languages/Rust"</span>,
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">capture</span></div>
+<pre>write_note(
+    path=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    content=note_md,        <span class="cm"># the filled template, shown below</span>
+    overwrite=False,        <span class="cm"># refuse to clobber an existing note</span>
+)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"path"</span>: <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    <span class="kw">"created"</span>: True,
+    <span class="kw">"title"</span>: <span class="str">"Tokio Work-Stealing Scheduler"</span>,
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <p>Then the folder's <code>index.md</code> is regenerated, and the skill looks for genuine neighbors to link:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">re-index + connect</span></div>
+<pre>rebuild_index(folder=<span class="str">"Engineering/Languages/Rust"</span>)
+get_backlinks(note=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>)
+search(query=<span class="str">"async runtime"</span>, limit=5)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"index"</span>: <span class="str">"Engineering/Languages/Rust/index.md"</span>,
+    <span class="kw">"children"</span>: {<span class="kw">"folders"</span>: 0, <span class="kw">"notes"</span>: 1},
+    <span class="kw">"updated"</span>: True,
+}  <span class="cm"># illustrative shape — confirmed on implementation</span>
+
+<span class="cm"># search surfaces a real note → the skill proposes [[Async Runtime]]</span>
+<span class="cm"># and offers [[Green Threads vs OS Threads]] as a candidate you confirm.</span></pre>
+        </div>
+      </div>
+
+      <p><strong>Only links that resolve to real hits are proposed.</strong> A topic with no note yet stays a candidate until you say yes — Engram never fabricates a connection to make the graph look fuller.</p>
+
+      <h3>The note that lands</h3>
+      <p>Here is <code>note_md</code> — the Standard Note Template, filled from the explanation above. The <em>Explanation</em> section is your sentences, lightly formatted; nothing is rewritten into textbook prose, and the empty <em>Examples</em> section is left honestly empty rather than invented.</p>
+
+      <div class="code">
+        <div class="code-label">tokio-work-stealing-scheduler.md <span class="tail">markdown + frontmatter</span></div>
+<pre><span class="kw">---</span>
+<span class="kw">title:</span> Tokio Work-Stealing Scheduler
+<span class="kw">category:</span> Languages/Rust
+<span class="kw">status:</span> learning
+<span class="kw">confidence:</span> 2
+<span class="kw">created:</span> 2026-06-28
+<span class="kw">updated:</span> 2026-06-28
+<span class="kw">tags:</span> [rust, tokio, concurrency, async, scheduler]
+<span class="kw">source:</span>
+<span class="kw">---</span>
+
+<span class="dir"># Summary</span>
+Tokio keeps every worker thread busy with per-worker local run queues; an
+idle worker steals a batch of tasks from another worker instead of waiting.
+
+<span class="dir"># Explanation</span>
+Each worker thread has its own local run queue. When a worker drains its
+queue, it steals a batch of tasks from the back of another worker's queue
+instead of sitting idle. Tasks spawned from outside the runtime go on a
+global injector queue. The whole point is to spread load without a single
+global lock becoming the bottleneck.
+
+<span class="dir"># Examples</span>
+(none provided yet)
+
+<span class="dir"># Related Topics</span>
+<span class="lk">[[Async Runtime]]</span>
+<span class="lk">[[Green Threads vs OS Threads]]</span>
+
+<span class="dir"># Questions I Still Have</span>
+- How large is a "batch" when one worker steals from another?
+
+<span class="dir"># Revision Questions</span>
+- Explain work-stealing without looking.
+- What problem does the per-worker local queue solve?
+- When would the global injector queue itself become the bottleneck?</pre>
+      </div>
+
+      <p>A note can also carry a per-note metadata block, maintained as you revisit it over time:</p>
+      <div class="chips">
+        <span class="chip">first_learned</span>
+        <span class="chip">last_reviewed</span>
+        <span class="chip">last_used</span>
+        <span class="chip">projects</span>
+        <span class="chip">related</span>
+        <span class="chip">difficulty</span>
+        <span class="chip">status</span>
+      </div>
+
+      <h3>And then — one question</h3>
+      <p>The session closes with Mentor Mode: exactly one follow-up, or one pointed misunderstanding, or one next-topic nudge. Never a lecture.</p>
+
+      <blockquote class="pquote">
+        One to sit with — when every worker's local queue is already full, where does a task spawned from outside the runtime go, and what keeps that injector queue from becoming the single global lock you just designed around?
+        <span class="src">— Engram, Mentor Mode (one question, then it stops)</span>
+      </blockquote>
+
+      <h3 id="edge-exists">Edge variant — the note already exists</h3>
+      <p>Run the same session a second time and dedupe finds the note. <code>write_note</code> with the default <code>overwrite=False</code> refuses, loudly:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">capture (retry)</span></div>
+<pre>write_note(
+    path=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    content=note_md,
+    overwrite=False,
+)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"error"</span>: <span class="str">"note_exists"</span>,
+    <span class="kw">"path"</span>: <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <p>The skill now chooses deliberately. If this is the <em>same</em> concept going deeper, it appends a section:</p>
+
+      <div class="code code--call">
+        <div class="code-label">call <span class="tail">deepen in place</span></div>
+<pre>append_note(
+    path=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    content=<span class="str">"\n## A worker steals roughly half of another's queue, not one task.\n"</span>,
+)</pre>
+      </div>
+
+      <p>If it's a genuinely <em>distinct</em> topic, it writes under a new title instead:</p>
+
+      <div class="code code--call">
+        <div class="code-label">call <span class="tail">distinct topic</span></div>
+<pre>write_note(
+    path=<span class="str">"Engineering/Languages/Rust/tokio-task-budgeting.md"</span>,
+    content=note_md,
+    overwrite=False,
+)</pre>
+      </div>
+
+      <div class="when">
+        <div class="wlabel">Append vs new title vs overwrite</div>
+        <p><strong>Append</strong> when it's the same idea deepened. <strong>New title</strong> when it's a separate concept that merely sounds related. <strong><code>overwrite=True</code></strong> is reserved for a deliberate replacement you asked for — it is never the default escape hatch.</p>
+      </div>
+    </section>
+
+    <!-- 3 · REDISCOVERY -->
+    <section class="section" id="s3">
+      <div class="sec-head">
+        <span class="sec-num">Flow 03 · Retrieval</span>
+        <h2 class="sec-title">Rediscovery, months later</h2>
+      </div>
+
+      <p>The payoff is future-you finding present-you's thinking fast. Three tools cover it: <code>search</code> when you remember <em>words</em>, <code>find_by_metadata</code> when you remember a <em>property</em>, and <code>get_backlinks</code> when you want the <em>web</em> around a note.</p>
+
+      <h3>Search — ranked, and it tells you why</h3>
+      <p>Hits are ranked by where the match landed: <code>title &gt; alias &gt; tag &gt; heading &gt; content &gt; linked-notes</code>. Each hit names its matched <code>field</code>, so a result is never a mystery.</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call</div>
+<pre>search(query=<span class="str">"work stealing"</span>, limit=5)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"query"</span>: <span class="str">"work stealing"</span>,
+    <span class="kw">"hits"</span>: [
+        {
+            <span class="kw">"path"</span>: <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+            <span class="kw">"field"</span>: <span class="str">"title"</span>,     <span class="cm"># strongest signal → ranks first</span>
+            <span class="kw">"snippet"</span>: <span class="str">"Tokio Work-Stealing Scheduler"</span>,
+            <span class="kw">"score"</span>: 0.98,
+        },
+        {
+            <span class="kw">"path"</span>: <span class="str">"Engineering/Foundations/Concurrency/run-queues.md"</span>,
+            <span class="kw">"field"</span>: <span class="str">"content"</span>,   <span class="cm"># weaker signal → ranks lower</span>
+            <span class="kw">"snippet"</span>: <span class="str">"…steals a batch from the back of another worker's queue…"</span>,
+            <span class="kw">"score"</span>: 0.41,
+        },
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <h3>Find by metadata — when you remember a property</h3>
+      <p>You don't always remember words. Sometimes you remember "that Rust thing," or "the stuff I only half-understood." <code>find_by_metadata</code> filters on frontmatter:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">by tag</span></div>
+<pre>find_by_metadata(field=<span class="str">"tag"</span>, value=<span class="str">"rust"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"field"</span>: <span class="str">"tag"</span>,
+    <span class="kw">"value"</span>: <span class="str">"rust"</span>,
+    <span class="kw">"notes"</span>: [
+        <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+        <span class="str">"Engineering/Languages/Rust/pin-and-unpin.md"</span>,
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <p>The filtered variant turns your own honesty into a review queue. The confidence scale runs 0–5; querying for <code>2</code> surfaces everything you marked <em>"understand the basics"</em> and no further:</p>
+
+      <div class="confidence" aria-hidden="true">
+        <div class="conf"><span class="n">0</span><span class="t">never seen</span></div>
+        <div class="conf"><span class="n">1</span><span class="t">recognize term</span></div>
+        <div class="conf is-on"><span class="n">2</span><span class="t">understand basics</span></div>
+        <div class="conf"><span class="n">3</span><span class="t">can explain</span></div>
+        <div class="conf"><span class="n">4</span><span class="t">have built with it</span></div>
+        <div class="conf"><span class="n">5</span><span class="t">can teach it</span></div>
+      </div>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">by confidence — the review queue</span></div>
+<pre>find_by_metadata(field=<span class="str">"confidence"</span>, value=2)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"field"</span>: <span class="str">"confidence"</span>,
+    <span class="kw">"value"</span>: 2,
+    <span class="kw">"notes"</span>: [
+        <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <h3>Backlinks — the web around a note</h3>
+      <p>To see what <em>points at</em> a note rather than the note itself, ask for its backlinks:</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call</div>
+<pre>get_backlinks(note=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"note"</span>: <span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    <span class="kw">"backlinks"</span>: [
+        <span class="str">"Engineering/Languages/Rust/async-runtime.md"</span>,
+        <span class="str">"Engineering/Projects/voice-agent-runtime.md"</span>,
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <div class="when">
+        <div class="wlabel">Which retrieval tool</div>
+        <p><strong>search</strong> when you remember roughly what you wrote. <strong>find_by_metadata</strong> when you remember a property — a tag, a status, a confidence level. <strong>get_backlinks</strong> when the note isn't the point and the connections are.</p>
+      </div>
+    </section>
+
+    <!-- 4 · MAINTENANCE -->
+    <section class="section" id="s4">
+      <div class="sec-head">
+        <span class="sec-num">Flow 04 · Upkeep</span>
+        <h2 class="sec-title">Maintaining the vault</h2>
+      </div>
+
+      <p>Knowledge moves. A note you filed under <code>Languages/Rust/</code> turns out to be a concurrency idea; a title reads better reworded. <code>move</code> and <code>rename_note</code> relocate things; <code>rebuild_index</code> keeps the navigation honest afterward.</p>
+
+      <h3>Move, then re-index both ends</h3>
+      <p>An index is a pure function of its folder's contents, so after a move you rebuild <em>both</em> the old and new parents:</p>
+
+      <div class="code code--call">
+        <div class="code-label">call <span class="tail">relocate</span></div>
+<pre>move(
+    src=<span class="str">"Engineering/Languages/Rust/tokio-work-stealing-scheduler.md"</span>,
+    dest=<span class="str">"Engineering/Foundations/Concurrency/tokio-work-stealing-scheduler.md"</span>,
+)
+rebuild_index(folder=<span class="str">"Engineering/Languages/Rust"</span>)            <span class="cm"># note left here</span>
+rebuild_index(folder=<span class="str">"Engineering/Foundations/Concurrency"</span>)   <span class="cm"># note landed here</span></pre>
+      </div>
+
+      <h3>Rename a title, then re-index</h3>
+      <div class="code code--call">
+        <div class="code-label">call <span class="tail">rename + re-index</span></div>
+<pre>rename_note(
+    path=<span class="str">"Engineering/Foundations/Concurrency/tokio-work-stealing-scheduler.md"</span>,
+    new_title=<span class="str">"Work-Stealing Scheduler (Tokio)"</span>,
+)
+rebuild_index(folder=<span class="str">"Engineering/Foundations/Concurrency"</span>)</pre>
+      </div>
+
+      <h3>Peek without reading the whole note</h3>
+      <p>Retrieval discipline: skim structure cheaply instead of pulling full bodies into context. <code>list_dir</code>, <code>list_headings</code> and <code>get_metadata</code> are the three lenses.</p>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">outline only</span></div>
+<pre>list_headings(note=<span class="str">"Engineering/Foundations/Concurrency/tokio-work-stealing-scheduler.md"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"note"</span>: <span class="str">"…/tokio-work-stealing-scheduler.md"</span>,
+    <span class="kw">"headings"</span>: [
+        <span class="str">"Summary"</span>, <span class="str">"Explanation"</span>, <span class="str">"Examples"</span>,
+        <span class="str">"Related Topics"</span>, <span class="str">"Questions I Still Have"</span>, <span class="str">"Revision Questions"</span>,
+    ],
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <div class="exchange">
+        <div class="code code--call">
+          <div class="code-label">call <span class="tail">frontmatter only</span></div>
+<pre>get_metadata(note=<span class="str">"Engineering/Foundations/Concurrency/tokio-work-stealing-scheduler.md"</span>)</pre>
+        </div>
+        <div class="code code--return">
+          <div class="code-label">returns <span class="tail">illustrative</span></div>
+<pre>{
+    <span class="kw">"title"</span>: <span class="str">"Work-Stealing Scheduler (Tokio)"</span>,
+    <span class="kw">"category"</span>: <span class="str">"Foundations/Concurrency"</span>,
+    <span class="kw">"status"</span>: <span class="str">"learning"</span>,
+    <span class="kw">"confidence"</span>: 2,
+    <span class="kw">"created"</span>: <span class="str">"2026-06-28"</span>,
+    <span class="kw">"updated"</span>: <span class="str">"2026-06-28"</span>,
+    <span class="kw">"tags"</span>: [<span class="str">"rust"</span>, <span class="str">"tokio"</span>, <span class="str">"concurrency"</span>, <span class="str">"async"</span>, <span class="str">"scheduler"</span>],
+    <span class="kw">"source"</span>: None,
+}  <span class="cm"># illustrative shape — confirmed on implementation</span></pre>
+        </div>
+      </div>
+
+      <p>For a heavier reorg of a whole branch, <code>rename_folder(path, new_name)</code> and <code>move(src, dest)</code> work on folders too — same rule applies: rebuild the touched indexes when you're done.</p>
+
+      <div class="when">
+        <div class="wlabel">When to call <code>rebuild_index</code></div>
+        <p>After every add, move, or rename — and whenever an index looks stale. It's <strong>idempotent</strong>: calling it twice costs nothing and the output never drifts, so over-calling is always safe.</p>
+      </div>
+    </section>
+
+    <!-- 5 · SAFETY -->
+    <section class="section" id="s5">
+      <div class="sec-head">
+        <span class="sec-num">Flow 05 · Edges</span>
+        <h2 class="sec-title">Safety behaviors you'll meet</h2>
+      </div>
+
+      <p>Engram fails <strong>loudly and recoverably</strong>, and never destroys your data. Four edges you'll hit, and exactly what you see at the boundary each time.</p>
+
+      <!-- overwrite guard -->
+      <div class="edge">
+        <div class="edge-head"><span class="etag">note_exists</span><h4>The overwrite guard</h4></div>
+        <div class="code">
+          <div class="code-label">repl <span class="tail">illustrative</span></div>
+<pre>write_note(path=<span class="str">"…/tokio-work-stealing-scheduler.md"</span>, content=note_md, overwrite=False)
+<span class="cm"># →</span> {<span class="kw">"error"</span>: <span class="str">"note_exists"</span>, <span class="kw">"path"</span>: <span class="str">"…/tokio-work-stealing-scheduler.md"</span>}</pre>
+        </div>
+        <div class="see">You can't lose a note to a stray write. The skill must pick a path on purpose — <strong>append</strong>, a <strong>new title</strong>, or an explicit <code>overwrite=True</code>.</div>
+      </div>
+
+      <!-- soft delete -->
+      <div class="edge">
+        <div class="edge-head"><span class="etag">.trash/</span><h4>Soft delete — recoverable</h4></div>
+        <div class="code">
+          <div class="code-label">repl <span class="tail">illustrative</span></div>
+<pre>delete_note(path=<span class="str">"Engineering/Languages/Rust/pin-and-unpin.md"</span>)
+<span class="cm"># →</span> {<span class="kw">"deleted"</span>: True, <span class="kw">"moved_to"</span>: <span class="str">".trash/Engineering/Languages/Rust/pin-and-unpin.md"</span>}
+
+<span class="cm"># recover by moving it back out of .trash/</span>
+move(src=<span class="str">".trash/Engineering/Languages/Rust/pin-and-unpin.md"</span>,
+     dest=<span class="str">"Engineering/Languages/Rust/pin-and-unpin.md"</span>)</pre>
+        </div>
+        <div class="see">Nothing is hard-deleted in v0.1. <code>delete_note</code> moves the file to <code>.trash/</code>; it stays recoverable with a plain <code>move</code>.</div>
+      </div>
+
+      <!-- lenient frontmatter -->
+      <div class="edge">
+        <div class="edge-head"><span class="etag">frontmatter_error</span><h4>A hand-edit typo never crashes</h4></div>
+        <div class="code">
+          <div class="code-label">repl <span class="tail">illustrative</span></div>
+<pre>get_metadata(note=<span class="str">"Engineering/Languages/Rust/lifetimes.md"</span>)
+<span class="cm"># →</span> {
+<span class="cm">#       </span><span class="kw">"frontmatter_error"</span>: True,                       <span class="cm"># the YAML didn't parse…</span>
+<span class="cm">#       </span><span class="kw">"raw_frontmatter"</span>: <span class="str">"tags: [rust, lifetimes\nconfidence: 3"</span>,  <span class="cm"># …handed back as-is</span>
+<span class="cm">#   </span>}</pre>
+        </div>
+        <div class="see">You fat-finger the YAML, the parser stays lenient: it returns the raw block with a <code>frontmatter_error</code> flag instead of throwing. The note still indexes by body, headings and links — only <em>metadata</em> queries skip it until you fix the typo by hand.</div>
+      </div>
+
+      <!-- path escape -->
+      <div class="edge">
+        <div class="edge-head"><span class="etag">path escape</span><h4>The vault is a sealed root</h4></div>
+        <div class="code">
+          <div class="code-label">repl <span class="tail">illustrative</span></div>
+<pre>read_note(path=<span class="str">"../../etc/passwd"</span>)
+<span class="cm"># →</span> {<span class="kw">"error"</span>: <span class="str">"path_escape"</span>}   <span class="cm"># illustrative code — name confirmed on implementation</span></pre>
+        </div>
+        <div class="see">Every path resolves under <code>ENGRAM_VAULT</code> first. A <code>..</code> or absolute path is rejected <strong>before any filesystem touch</strong>; the skill surfaces the error and doesn't retry blindly.</div>
+      </div>
+
+      <div class="callout"><strong>Why it reads this way.</strong> Structured, named errors let the skill react deliberately — choose a new title, recover from <code>.trash/</code>, fix a typo — rather than paper over a failure. The boundary is the product: the server fails honestly, and the reasoning lives entirely in the skill.</div>
+    </section>
+
+    <!-- 6 · CHEAT SHEET -->
+    <section class="section" id="s6">
+      <div class="sec-head">
+        <span class="sec-num">Reference</span>
+        <h2 class="sec-title">API cheat sheet</h2>
+      </div>
+
+      <p>The complete v0.1 surface — every tool, the env var, and the entry point, one line each.</p>
+
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th class="col-sig">Signature</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="2">Entry &amp; config</td></tr>
+            <tr><td><code>/engram</code></td><td>Skill entry point; the only human surface. Also auto-triggers when you say "I learned…".</td></tr>
+            <tr><td><code>ENGRAM_VAULT</code></td><td>Env var — the vault root the server reads and writes. Defaults to <code>engram-data/</code>.</td></tr>
+
+            <tr class="grp"><td colspan="2">Folders</td></tr>
+            <tr><td><code>create_folder(path)</code></td><td>Create nested folders lazily; returns the path(s) created.</td></tr>
+            <tr><td><code>list_dir(path)</code></td><td>List child folders + notes with light metadata (name, type, mtime).</td></tr>
+            <tr><td><code>rename_folder(path, new_name)</code></td><td>Rename a folder.</td></tr>
+            <tr><td><code>move(src, dest)</code></td><td>Move a note or a folder.</td></tr>
+
+            <tr class="grp"><td colspan="2">Notes</td></tr>
+            <tr><td><code>read_note(path)</code></td><td>Full content + parsed metadata (frontmatter, headings, links).</td></tr>
+            <tr><td><code>write_note(path, content, overwrite=False)</code></td><td>Create, or overwrite only when asked; the default refuses, erroring <code>note_exists</code>.</td></tr>
+            <tr><td><code>append_note(path, content)</code></td><td>Append text or a section to an existing note.</td></tr>
+            <tr><td><code>rename_note(path, new_title)</code></td><td>Rename a note's title.</td></tr>
+            <tr><td><code>delete_note(path)</code></td><td>Soft-delete — moves the note to <code>.trash/</code> (recoverable).</td></tr>
+
+            <tr class="grp"><td colspan="2">Queries — the structure-aware value</td></tr>
+            <tr><td><code>search(query, limit)</code></td><td>Ranked hits: title &gt; alias &gt; tag &gt; heading &gt; content &gt; linked-notes. Each hit = path, field, snippet, score.</td></tr>
+            <tr><td><code>find_by_metadata(field, value)</code></td><td>Notes whose frontmatter <code>field</code> matches <code>value</code>.</td></tr>
+            <tr><td><code>get_backlinks(note)</code></td><td>Notes that contain <code>[[note]]</code>.</td></tr>
+            <tr><td><code>list_headings(note)</code></td><td>The heading outline of a note.</td></tr>
+            <tr><td><code>get_metadata(note)</code></td><td>Frontmatter as a structured dict.</td></tr>
+
+            <tr class="grp"><td colspan="2">Index</td></tr>
+            <tr><td><code>rebuild_index(folder)</code></td><td>Regenerate <code>index.md</code> from directory contents; deterministic and idempotent.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- mobile contents (hidden on desktop) -->
+    <nav class="toc-mobile">
+      <details>
+        <summary>Contents</summary>
+        <ol>
+          <li><a href="#s1"><span class="sn">1</span>Setup &amp; first run</a></li>
+          <li><a href="#s2"><span class="sn">2</span>A learning session</a></li>
+          <li><a href="#s3"><span class="sn">3</span>Rediscovery</a></li>
+          <li><a href="#s4"><span class="sn">4</span>Maintaining the vault</a></li>
+          <li><a href="#s5"><span class="sn">5</span>Safety behaviors</a></li>
+          <li><a href="#s6"><span class="sn">⌘</span>API cheat sheet</a></li>
+        </ol>
+      </details>
+    </nav>
+
+  </main>
+</div>
+</div>
+
+<!-- ===================== COLOPHON ===================== -->
+<footer class="colophon">
+  <div class="page">
+    <div class="seal" aria-hidden="true"><span></span></div>
+    <blockquote>Engram exists to preserve my thinking, not replace it.</blockquote>
+    <div class="end">DX overview · v0.1 · 2026-06-28</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.spine a[data-spy]'));
+  var sections = links.map(function(a){ return document.getElementById(a.getAttribute('data-spy')); }).filter(Boolean);
+  var progress = document.getElementById('spineProgress');
+  if(!sections.length) return;
+
+  function setActive(id){
+    links.forEach(function(a){
+      a.classList.toggle('is-active', a.getAttribute('data-spy') === id);
+    });
+  }
+
+  // Scroll-spy: the deepest section whose top has passed the focus line wins.
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var focus = window.innerHeight * 0.30;
+    var current = sections[0];
+    for(var i=0;i<sections.length;i++){
+      if(sections[i].getBoundingClientRect().top <= focus){ current = sections[i]; }
+    }
+    setActive(current.id);
+
+    if(progress){
+      var doc = document.documentElement;
+      var max = (doc.scrollHeight - window.innerHeight) || 1;
+      var pct = Math.min(1, Math.max(0, window.scrollY / max));
+      progress.style.height = (pct * 100) + '%';
+    }
+  }
+  function onScroll(){
+    if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+
+  links.forEach(function(a){
+    a.addEventListener('click', function(){ setActive(a.getAttribute('data-spy')); });
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>
