@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "engram": {
+      "command": "python",
+      "args": ["-m", "engram_mcp.server"],
+      "env": { "ENGRAM_VAULT": "engram-data" }
+    }
+  }
+}
