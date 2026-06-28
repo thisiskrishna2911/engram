@@ -16,6 +16,7 @@ EXPECTED_TOOLS = {
 }
 
 
+@pytest.mark.asyncio
 async def test_all_fifteen_tools_registered(vault):
     app = build_server(vault)
     tools = await app.list_tools()

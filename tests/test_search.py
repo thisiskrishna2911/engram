@@ -32,3 +32,13 @@ def test_search_orders_title_before_content(vault):
 def test_find_by_metadata_matches_list_member(golden):
     out = search.find_by_metadata(golden, "tags", "rust")
     assert [n["path"] for n in out["notes"]] == ["Engineering/Languages/Rust/tokio.md"]
+
+
+def test_search_excludes_index_md(vault):
+    from engram_mcp import index, notes, search
+
+    notes.write_note(vault, "Folder/a.md", "---\ntitle: Apple\n---\n\nx")
+    index.rebuild_index(vault, "Folder")  # index.md contains [[Apple]]
+    paths = [h["path"] for h in search.search(vault, "Apple")["hits"]]
+    assert "Folder/a.md" in paths
+    assert "Folder/index.md" not in paths

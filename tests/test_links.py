@@ -20,3 +20,13 @@ def test_iter_notes_skips_trash(vault):
     notes.delete_note(vault, "gone.md")
     found = [vault.relpath(p) for p in links._iter_notes(vault)]
     assert found == ["real.md"]
+
+
+def test_iter_notes_excludes_index_md(vault):
+    from engram_mcp import index, links, notes
+
+    notes.write_note(vault, "Folder/a.md", "---\ntitle: A\n---\n\nx")
+    index.rebuild_index(vault, "Folder")  # writes Folder/index.md containing [[A]]
+    found = [vault.relpath(p) for p in links._iter_notes(vault)]
+    assert "Folder/a.md" in found
+    assert "Folder/index.md" not in found
