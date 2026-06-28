@@ -71,3 +71,14 @@ def test_move_folder(vault):
     folders.move(vault, "src", "dest/src")
     assert vault.resolve("dest/src/inner").is_dir()
     assert not vault.resolve("src").exists()
+
+
+def test_list_dir_skips_index_md(vault):
+    from engram_mcp import index
+
+    notes.write_note(vault, "Folder/a.md", "---\ntitle: A\n---\n\nx")
+    index.rebuild_index(vault, "Folder")  # creates Folder/index.md
+    out = folders.list_dir(vault, "Folder")
+    names = [n["name"] for n in out["notes"]]
+    assert "a.md" in names
+    assert "index.md" not in names

@@ -3,7 +3,10 @@
     "engram": {
       "command": "python3",
       "args": ["-m", "engram_mcp.server"],
-      "env": { "ENGRAM_VAULT": "engram-data" }
+      "env": {
+        "ENGRAM_VAULT": "engram-data",
+        "PYTHONPATH": "src"
+      }
     }
   }
 }

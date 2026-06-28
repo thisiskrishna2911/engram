@@ -1,3 +1,12 @@
+## Prerequisites
+
+From the repo root, install the package and test deps once:
+
+    pip install -e ".[dev]"
+
+The `.mcp.json` also sets `PYTHONPATH=src`, so the server runs from a fresh
+checkout (run from the repo root) as long as `mcp` and `pyyaml` are installed.
+
 # Engram end-to-end verification
 
 With the `engram` MCP server registered (`.mcp.json`) and the `engram` skill installed:

@@ -17,7 +17,7 @@ def list_dir(vault: Vault, path: str = ".") -> dict:
         raise NotFoundError(path)
     folders_out, notes_out = [], []
     for child in sorted(p.iterdir(), key=lambda c: c.name.lower()):
-        if child.name.startswith("."):
+        if child.name.startswith(".") or child.name == "index.md":
             continue
         if child.is_dir():
             folders_out.append({"name": child.name, "path": vault.relpath(child)})

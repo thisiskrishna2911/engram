@@ -6,19 +6,34 @@ TRASH_DIRNAME = ".trash"
 
 
 class VaultError(Exception):
-    """Base class for vault operation errors."""
+    """Base class for vault operation errors. The message is prefixed with a
+    stable `code` token so callers (and Claude, after the MCP framework
+    flattens the exception to its string form) can branch on the failure
+    mode."""
+
+    code = "vault_error"
+
+    def __init__(self, detail: str = "") -> None:
+        self.detail = str(detail)
+        super().__init__(f"{self.code}: {self.detail}" if self.detail else self.code)
 
 
 class PathEscapeError(VaultError):
     """A path resolved outside the vault root."""
 
+    code = "path_escape"
+
 
 class NotFoundError(VaultError):
     """A target note or folder does not exist."""
 
+    code = "not_found"
+
 
 class NoteExistsError(VaultError):
-    """Writing would clobber an existing note without overwrite=True."""
+    """Writing, renaming, or moving would clobber an existing path without overwrite."""
+
+    code = "note_exists"
 
 
 class Vault:
@@ -36,4 +51,7 @@ class Vault:
         return candidate
 
     def relpath(self, p: Path) -> str:
-        return Path(p).resolve().relative_to(self.root).as_posix()
+        try:
+            return Path(p).resolve().relative_to(self.root).as_posix()
+        except ValueError:
+            raise PathEscapeError(str(p)) from None
