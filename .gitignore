@@ -21,7 +21,7 @@ env/
 
 # Engram vault — the user's personal knowledge data, kept out of git by default.
 # Remove this line if you want to version your notes / use git as vault backup.
-/engram-data/
+#/engram-data/
 
 # Local Claude settings (machine-specific)
 .claude/settings.local.json
