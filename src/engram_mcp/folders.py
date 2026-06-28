@@ -1,7 +1,7 @@
 import shutil
 
 from . import frontmatter as fm
-from .vault import NotFoundError, Vault
+from .vault import NoteExistsError, NotFoundError, Vault
 
 
 def create_folder(vault: Vault, path: str) -> dict:
@@ -36,6 +36,8 @@ def rename_folder(vault: Vault, path: str, new_name: str) -> dict:
     if not p.is_dir():
         raise NotFoundError(path)
     target = p.parent / new_name
+    if target.exists():
+        raise NoteExistsError(vault.relpath(target))
     p.rename(target)
     return {"old_path": vault.relpath(p), "new_path": vault.relpath(target)}
 
@@ -45,6 +47,8 @@ def move(vault: Vault, src: str, dest: str) -> dict:
     if not s.exists():
         raise NotFoundError(src)
     d = vault.resolve(dest)
+    if d.exists():
+        raise NoteExistsError(vault.relpath(d))
     d.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(str(s), str(d))
     return {"src": vault.relpath(s), "dest": vault.relpath(d)}

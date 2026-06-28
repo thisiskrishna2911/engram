@@ -1,7 +1,7 @@
 import pytest
 
 from engram_mcp import folders, notes
-from engram_mcp.vault import NotFoundError
+from engram_mcp.vault import NoteExistsError, NotFoundError
 
 
 def test_create_folder_is_lazy_and_nested(vault):
@@ -45,3 +45,29 @@ def test_rename_folder(vault):
     res = folders.rename_folder(vault, "old", "new")
     assert res["new_path"] == "new"
     assert vault.resolve("new").is_dir()
+
+
+def test_rename_folder_refuses_clobber(vault):
+    folders.create_folder(vault, "a")
+    folders.create_folder(vault, "b")
+    with pytest.raises(NoteExistsError):
+        folders.rename_folder(vault, "a", "b")
+    assert vault.resolve("a").is_dir()
+    assert vault.resolve("b").is_dir()
+
+
+def test_move_refuses_clobber(vault):
+    notes.write_note(vault, "a.md", "one")
+    notes.write_note(vault, "b.md", "two")
+    with pytest.raises(NoteExistsError):
+        folders.move(vault, "a.md", "b.md")
+    assert vault.resolve("a.md").exists()
+    assert notes.read_note(vault, "b.md")["content"] == "two"
+
+
+def test_move_folder(vault):
+    folders.create_folder(vault, "src/inner")
+    folders.create_folder(vault, "dest")
+    folders.move(vault, "src", "dest/src")
+    assert vault.resolve("dest/src/inner").is_dir()
+    assert not vault.resolve("src").exists()
