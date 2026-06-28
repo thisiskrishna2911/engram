@@ -48,3 +48,12 @@ def test_delete_note_moves_to_trash(vault):
     assert res["trashed_to"].startswith(TRASH_DIRNAME + "/")
     assert not vault.resolve("n.md").exists()
     assert vault.resolve(res["trashed_to"]).exists()
+
+
+def test_rename_note_refuses_clobber(vault):
+    notes.write_note(vault, "a.md", "one")
+    notes.write_note(vault, "b.md", "two")
+    with pytest.raises(NoteExistsError):
+        notes.rename_note(vault, "a.md", "b")
+    assert notes.read_note(vault, "a.md")["content"] == "one"
+    assert notes.read_note(vault, "b.md")["content"] == "two"

@@ -63,6 +63,8 @@ def rename_note(vault: Vault, path: str, new_title: str) -> dict:
     p = _require_file(vault, path)
     new_name = new_title if new_title.endswith(".md") else f"{new_title}.md"
     target = p.parent / new_name
+    if target.exists():
+        raise NoteExistsError(vault.relpath(target))
     p.rename(target)
     return {"old_path": vault.relpath(p), "new_path": vault.relpath(target)}
 
