@@ -12,12 +12,12 @@ EXPECTED_TOOLS = {
     "create_folder", "list_dir", "rename_folder", "move",
     "read_note", "write_note", "append_note", "rename_note", "delete_note",
     "search", "find_by_metadata", "get_backlinks", "list_headings", "get_metadata",
-    "rebuild_index",
+    "rebuild_index", "read_constitution",
 }
 
 
 @pytest.mark.asyncio
-async def test_all_fifteen_tools_registered(vault):
+async def test_all_tools_registered(vault):
     app = build_server(vault)
     tools = await app.list_tools()
     assert {t.name for t in tools} == EXPECTED_TOOLS

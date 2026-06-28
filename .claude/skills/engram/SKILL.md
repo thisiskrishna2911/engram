@@ -13,6 +13,10 @@ This skill operates under the **Engram Constitution** (`docs/CONSTITUTION.md`): 
 Constitution sets the principles, this skill sets the workflow. **If they ever conflict,
 the Constitution wins.**
 
+**Load your authority first.** At the start of a session, read the full Constitution —
+call the `read_constitution` tool (or read `docs/CONSTITUTION.md`) — before your first
+note operation.
+
 ## Hard guardrails (non-negotiable)
 
 - Preserve the user's wording and voice. Improve **formatting only** — never rewrite
