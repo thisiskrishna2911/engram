@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.krishna.engram.ready</string>
+  <!-- At login, sync the uv-managed env so the engram MCP server is ready to be
+       spawned on demand (it is a stdio server, not a long-running daemon). -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Library/Frameworks/Python.framework/Versions/3.13/bin/uv</string>
+    <string>sync</string>
+    <string>--extra</string>
+    <string>dev</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/krishna.champaneria/Documents/engram</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardErrorPath</key>
+  <string>/tmp/engram.ready.err</string>
+  <key>StandardOutPath</key>
+  <string>/tmp/engram.ready.out</string>
+</dict>
+</plist>

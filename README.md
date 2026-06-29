@@ -109,30 +109,39 @@ Every folder may hold an `index.md` (navigation only), regenerated deterministic
 
 ## Getting started
 
-**Prerequisites:** Python 3.13+.
+**Prerequisites:** Python 3.13+ and [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-# From the repo root — installs the package and test deps
-pip install -e ".[dev]"
+# From the repo root — uv creates an isolated, managed venv and installs everything
+uv sync --extra dev
 ```
 
-**Register the MCP server.** `.mcp.json` (already in the repo) points your MCP client at
-the server:
+**Register the MCP server.** `.mcp.json` (already in the repo) launches the server via
+`uv run`, so the environment is synced on every spawn — no manual activation:
 
 ```json
 {
   "mcpServers": {
     "engram": {
-      "command": "python3",
-      "args": ["-m", "engram_mcp.server"],
-      "env": { "ENGRAM_VAULT": "engram-data", "PYTHONPATH": "src" }
+      "command": "uv",
+      "args": ["--directory", "/path/to/engram", "run", "engram-mcp"],
+      "env": { "ENGRAM_VAULT": "engram-data" }
     }
   }
 }
 ```
 
 - `ENGRAM_VAULT` — the vault directory (default `engram-data/`).
-- `PYTHONPATH=src` lets the server run from a fresh checkout without the editable install.
+- It's a **stdio** server — the MCP client spawns it on demand (not a daemon).
+
+**Ready on every boot (macOS).** A LaunchAgent pre-warms the uv env at login, so the
+first spawn after you start your machine is instant:
+
+```bash
+cp launchd/com.krishna.engram.ready.plist ~/Library/LaunchAgents/
+launchctl load -w ~/Library/LaunchAgents/com.krishna.engram.ready.plist
+# to remove:  launchctl unload ~/Library/LaunchAgents/com.krishna.engram.ready.plist
+```
 
 **Use it.** In an MCP-capable client (e.g. Claude Code) with the `engram` skill installed,
 type `/engram` and explain something you learned. A note appears in your vault, the index
@@ -208,7 +217,7 @@ engram/
 ## Development
 
 ```bash
-python3 -m pytest -q        # run the full suite
+uv run pytest -q            # run the full suite
 ```
 
 The codebase follows a strict separation: **the server is deterministic and never
