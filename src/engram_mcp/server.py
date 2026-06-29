@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
-from . import folders, index, links, notes
+from . import constitution, folders, index, links, notes
 from .vault import Vault
 
 
@@ -73,6 +73,18 @@ def build_server(vault: Vault | None = None) -> FastMCP:
     @app.tool()
     def rebuild_index(folder: str) -> dict:
         return index.rebuild_index(vault, folder)
+
+    # --- Constitution (governing principles) ---
+    @app.tool()
+    def read_constitution() -> dict:
+        return {
+            "path": str(constitution.constitution_path()),
+            "content": constitution.read_constitution(),
+        }
+
+    @app.resource(constitution.CONSTITUTION_URI)
+    def constitution_resource() -> str:
+        return constitution.read_constitution()
 
     return app
 
